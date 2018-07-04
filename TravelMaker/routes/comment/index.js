@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const review = require('./review.js');
-router.use('/', review);
+//로그인
+const comment = require('./comment.js');
+router.use('/', comment);
 
 module.exports = router;

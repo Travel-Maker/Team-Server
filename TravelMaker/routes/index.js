@@ -9,6 +9,10 @@ router.use('/user', user);
 const country = require('./country/index.js');
 router.use('/country', country);
 
+//신청하기 board의 댓글
+const comment = require('./comment/index.js');
+router.use('/comment', comment);
+
 //후기 보기
 const review = require('./review/index.js');
 router.use('/review', review);

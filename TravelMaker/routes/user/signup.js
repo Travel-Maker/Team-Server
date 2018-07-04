@@ -34,7 +34,7 @@ router.post('/', upload.single('user_img'), async (req, res) => {
 
         if (!checkNickResult) {
             res.status(500).send( {
-                message : "Internal Server Error_1"
+                message : "Internal Server Error"
             })
         } else if (checkNickResult.length == 1) {
             console.log("Nickname is already");

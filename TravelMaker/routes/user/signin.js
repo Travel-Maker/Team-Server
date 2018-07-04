@@ -21,6 +21,7 @@ router.post('/', async (req, res) => {
                 message : "Internal Server Error"
             })
         } else if (checkResult.length == 1) {
+            
             let token = jwt.sign(checkResult[0].user_idx);
 
             res.status(201).send({
