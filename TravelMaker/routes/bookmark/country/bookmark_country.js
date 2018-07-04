@@ -4,7 +4,7 @@ const router = express.Router();
 const db = require('../../../module/pool.js');
 const jwt = require('../../../module/jwt.js');
 
-//북마크 추가 밑 삭제
+//북마크 추가 및 삭제
 router.post('/', async (req, res) => {
 	let token = req.headers.token;
 	let decoded = jwt.verify(token);
