@@ -4,13 +4,14 @@ const router = express.Router();
 const db = require('../../module/pool.js');
 const jwt = require('../../module/jwt.js');
 
+//받은 플랜 관리
 router.post('/', async (req, res) => {
     let token = req.headers.token;
 	let decoded = jwt.verify(token);
 
     let user_idx = decoded.user_idx;
     
-    let selectPlanQuery = 'SELECT * FROM board WHERE expert_id = ?';
+    let selectPlanQuery = 'SELECT * FROM board WHERE expert_id = ? ORDER BY BOARD_idx DESC';
     let selectPlanReault = await db.queryParam_Arr(selectPlanQuery, [user_idx]);
 
     if (!selectPlanReault) {
@@ -26,6 +27,7 @@ router.post('/', async (req, res) => {
     }
 });
 
+//받은 플랜 상세보기
 router.get('/:board_idx', async (req, res) => {
     //해당 일정에 대한 플랜과 교통 + 시티
     let board_idx = req.params.board_idx;

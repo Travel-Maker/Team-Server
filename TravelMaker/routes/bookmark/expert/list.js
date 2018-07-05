@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const async = require('async');
-const db = require('../../module/pool.js');
+const db = require('../../../module/pool.js');
 
 router.post('/', async (req, res) => {
     let user_idx = req.params.user_idx;

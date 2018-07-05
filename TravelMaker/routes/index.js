@@ -6,8 +6,8 @@ const user = require('./user/index.js');
 router.use('/user', user);
 
 //나라 정보화면
-const country = require('./country/index.js');
-router.use('/country', country);
+// const country = require('./country/index.js');
+// router.use('/country', country);
 
 //신청하기 board의 댓글
 const comment = require('./comment/index.js');
@@ -36,6 +36,9 @@ router.use('/transportation', transportation);
 //북마크 (나라별 북마크, 전문가 북마크)
 const bookmark = require('./bookmark/index.js');
 router.use('/bookmark', bookmark);
+
+const search = require('./search/index.js');
+router.use('/search', search);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

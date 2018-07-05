@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 //전문가 더보기
-const user = require('./user.js');
-router.use('/', user);
+const expert = require('./expert.js');
+router.use('/expert', expert);
 
 //로그인
 const signin = require('./signin.js');

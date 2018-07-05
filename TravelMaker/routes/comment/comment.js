@@ -5,6 +5,7 @@ const moment = require('moment');
 const db = require('../../module/pool.js');			// queryParam_None, queryParam_Arr 두 개의 메소드
 const jwt = require('../../module/jwt.js');
 
+//특정 board의 코멘트 보기
 router.get('/:board_idx', async (req,res) => {
     let board_idx = req.params.board_idx;
 
@@ -14,15 +15,16 @@ router.get('/:board_idx', async (req,res) => {
     if(!getComment){
         res.status(500).send({
             msg : "Internal Server Error" 
-        })
+        });
     } else{
         res.status(200).send({
             msg : "Successfully Get Comment Data",
             data : getComment
-        })
+        });
     }
 })
 
+//전문가가 코멘트 작성
 router.post('/', async (req, res) => {
     let token = req.headers.token;
     let decoded = jwt.verify(token);
@@ -32,17 +34,17 @@ router.post('/', async (req, res) => {
     let board_idx = req.body.board_idx;
     let comment_writetime = moment().format('YYYY-MM-DD hh:mm:ss');
 
-    if(!comment_content || !board_idx || !user_idx || !comment_writetime){
+    if(!comment_content || !board_idx || !user_idx){
         res.status(400).send({
             msg : "Null Value"
         })
     } else{
-        let insertCommentQuery = "INSERT INTO comment(comment_content, board_idx, user_idx, comment_writetime) VALUES(?,?,?,?)";
-        let insertComment = await db.queryParam_Arr(insertCommentQuery, [comment_content, board_idx, user_idx, comment_writetime]);
+        let insertCommentQuery = "INSERT INTO comment (comment_content, board_idx, user_idx, comment_writetime) VALUES (?,?,?,?)";
+        let insertCommentResult = await db.queryParam_Arr(insertCommentQuery, [comment_content, board_idx, user_idx, comment_writetime]);
 
-        if(!insertComment){
+        if(!insertCommentResult){
             res.status(500).send({
-                msg : "Internal Server Error"
+                msg : "Internal Server Error : insert comment error"
             })
         } else{
             res.status(201).send({
@@ -52,6 +54,33 @@ router.post('/', async (req, res) => {
     }
 })
 
+//코멘트 수정
+router.put('/', async (req, res) => {
+    let comment_idx = req.body.comment_idx;
+    let comment_content = req.body.comment_content;
+    let comment_writetime = moment().format('YYYY-MM-DD hh:mm:ss');
+
+    if(!comment_content || !comment_idx ){
+        res.status(400).send({
+            msg : "Null Value : comment update"
+        })
+    } else{
+        let updateCommentQuery = "UPDATE comment SET (comment_content, comment_writetime) = (?,?) WHERE comment_idx = ?";
+        let updateCommentResult = await db.queryParam_Arr(updateCommentQuery, [comment_content, comment_writetime, comment_idx]);
+
+        if(!updateCommentResult){
+            res.status(500).send({
+                msg : "Internal Server Error : update comment error"
+            })
+        } else{
+            res.status(201).send({
+                msg : "Successfully Update Comment Data" 
+            })
+        }
+    }
+});
+
+//코멘트 삭제
 router.delete('/', async (req, res)=>{
 	let comment_idx = req.body.comment_idx;
 
@@ -60,7 +89,7 @@ router.delete('/', async (req, res)=>{
 
 	if(!checkComment){
 		res.status(500).send({
-			msg : "Internal Server Error"
+			msg : "Internal Server Error : Invalid comment_idx"
 		})
 	} else if(checkComment.length == 1){
 		let deleteCommentQuery = "DELETE FROM comment where comment_idx = ?";

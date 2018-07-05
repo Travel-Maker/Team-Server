@@ -1,7 +1,8 @@
 const express =require('express');
 const router = express.Router();
 
-const db = require('../../module/pool.js');
+const db = require('../../../module/pool.js');
+const jwt = require('../../../module/jwt.js');
 
 router.post('/', async(req, res) => {
     let token = req.headers.token;
