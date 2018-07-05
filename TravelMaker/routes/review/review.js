@@ -62,4 +62,64 @@ router.get('/:review_idx', async (req, res) => {
 
 });
 
+//후기 추가
+router.post('/', async (req, res) => {
+    let token = req.headers.token;
+	let decoded = jwt.verify(token);
+
+    let user_idx = decoded.user_idx;
+    let expert_idx = req.body.user_idx;
+    let country_idx = req.body.country_idx;
+    let board_idx = req.body.board_idx;
+    let review_content = req.body.review_content;
+    let review_rate = req.body.review_rate;
+    
+    if (!user_idx || !board_idx) {
+        res.status(400).send({
+            message : "Null Value"
+        });
+    } else {
+        let addReviewQuery = 'INSERT into review ( user_idx, expert_idx, country_idx, board_idx, review_content, review_rate )';
+        let addReview = await db.queryParam_Arr(addReviewQuery, [user_idx, expert_idx, country_idx, board_idx, review_content, review_rate]);
+
+        if (!addReview) {
+            res.status(500).send({
+                message : "Internal Server Error"
+            });
+        } else {
+            res.status(201).send({
+                message : "Review Addition Success",
+                data : addReview
+            });
+        }
+    }
+});
+
+//후기 삭제
+router.delete('/', async(req, res) => {
+    let review_idx = req.body.review_idx;
+
+    let selectReviewQuery = 'SELECT review_idx FROM review WHERE review_idx = ?';
+    let selectReview = await db.queryParam_Arr(selectReviewQuery, [review_idx]);
+
+    if (!selectReview) {
+        res.status(500).send({
+            message : "Internal Server Error"
+        });
+    } else if (selectReview.length == 1) {
+        let deleteReviewQuery = 'DELETE FROM review WHERE review_idx = ?';
+        let deleteReview = await db.queryParam_Arr(deleteReviewQuery, [review_idx]);
+
+        if (!deleteReview) {
+            res.status(500).send({
+                message : "Internal Server Error"
+            });
+        } else {
+            res.status(201).send({
+                message : "Review Deletion Success"
+            });
+        }
+    }
+});
+
 module.exports = router;
