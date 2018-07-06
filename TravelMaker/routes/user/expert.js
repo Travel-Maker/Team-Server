@@ -5,10 +5,10 @@ const db = require('../../module/pool.js');
 
 //해당 나라의 전문가 보이기
 router.get('/:country_name', async (req, res) => {
-    console.log("hiiiiiiiiiiii");
     let country_name = req.params.country_name;
+    
 
-    console("나라 이름 : " + country_name);
+    console.log("나라 이름 : " + country_name);
 
     if (!country_name) {
         res.status(500).send({

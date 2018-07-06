@@ -14,11 +14,11 @@ router.get('/:board_idx', async (req,res) => {
 
     if(!getComment){
         res.status(500).send({
-            msg : "Internal Server Error" 
+            message : "Internal Server Error" 
         });
     } else{
         res.status(200).send({
-            msg : "Successfully Get Comment Data",
+            message : "Successfully Get Comment Data",
             data : getComment
         });
     }
@@ -26,11 +26,11 @@ router.get('/:board_idx', async (req,res) => {
 
 //전문가가 코멘트 작성
 router.post('/', async (req, res) => {
-    // let token = req.headers.token;
-    // let decoded = jwt.verify(token);
+    let token = req.headers.token;
+    let decoded = jwt.verify(token);
 
-    // let user_idx = decoded.user_idx;
-    let user_idx = req.body.user_idx;
+    let user_idx = decoded.user_idx;
+    //let user_idx = req.body.user_idx;
     let comment_content = req.body.comment_content;
     let board_idx = req.body.board_idx;
     let comment_writetime = moment().format('YYYY-MM-DD hh:mm:ss');
@@ -43,13 +43,16 @@ router.post('/', async (req, res) => {
         let insertCommentQuery = "INSERT INTO comment (comment_content, board_idx, user_idx, comment_writetime) VALUES (?,?,?,?)";
         let insertCommentResult = await db.queryParam_Arr(insertCommentQuery, [comment_content, board_idx, user_idx, comment_writetime]);
 
+        console.log(insertCommentResult);
+
         if(!insertCommentResult){
             res.status(500).send({
                 message : "Internal Server Error : insert comment error"
             })
         } else{
             res.status(201).send({
-                message : "Successfully Register Comment Data" 
+                message : "Successfully Register Comment Data",
+                comment_idx : insertCommentResult.insertId
             })
         }
     }
@@ -68,6 +71,8 @@ router.put('/', async (req, res) => {
     } else{
         let updateCommentQuery = "UPDATE comment SET comment_content = ?, comment_writetime = ? WHERE comment_idx = ?";
         let updateCommentResult = await db.queryParam_Arr(updateCommentQuery, [comment_content, comment_writetime, comment_idx]);
+
+        console.log(updateCommentResult);
 
         if(!updateCommentResult){
             res.status(500).send({

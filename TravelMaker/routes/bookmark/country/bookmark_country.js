@@ -6,10 +6,11 @@ const jwt = require('../../../module/jwt.js');
 
 //북마크 추가 및 삭제
 router.post('/', async (req, res) => {
-	let token = req.headers.token;
-	let decoded = jwt.verify(token);
+	// let token = req.headers.token;
+	// let decoded = jwt.verify(token);
 
-	let user_idx = decoded.user_idx;
+	// let user_idx = decoded.user_idx;
+	let user_idx = req.body.user_idx;
 	let country_idx = req.body.country_idx;
 	
 	let PrintBookmarkQuery = 'SELECT * FROM bookmark_country WHERE country_idx = ? AND user_idx = ?;';
