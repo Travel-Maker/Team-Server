@@ -24,7 +24,7 @@ router.get('/:review_idx', async (req, res) => {
             });
         } else {
             res.status(200).send({
-                message : "Successfully Get Review", 
+                message : "Successfully Get Review Data", 
                 review : selectReviewResult
             });
         }
@@ -37,8 +37,9 @@ router.post('/', async (req, res) => {
     let token = req.headers.token;
 	let decoded = jwt.verify(token);
 
-    // let user_idx = decoded.user_idx;
-    let user_idx = req.body.user_idx;
+    let user_idx = decoded.user_idx;
+
+    //let user_idx = req.body.user_idx;
     let expert_idx = req.body.expert_idx;
     let board_idx = req.body.board_idx;
     let review_content = req.body.review_content;
@@ -86,7 +87,8 @@ router.post('/', async (req, res) => {
 
                 } else {
                     res.status(201).send({
-                        message : "Successfully Add Review"
+                        message : "Successfully Add Review",
+                        review_idx : addReview.insertId
                     });
                 }              
             }
@@ -154,7 +156,7 @@ router.put('/', async (req, res) => {
 
                 } else {
                     res.status(201).send({
-                        message : "Successfully Update Review"
+                        message : "Successfully Update Review Data"
                     });
                 }              
             }
@@ -214,7 +216,7 @@ router.delete('/', async(req, res) => {
 
                 } else {
                     res.status(201).send({
-                        message : "Successfully Delete Review"
+                        message : "Successfully Delete Review Data"
                     });
                 }              
             }
