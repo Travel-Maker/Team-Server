@@ -6,8 +6,8 @@ const user = require('./user/index.js');
 router.use('/user', user);
 
 //나라 정보화면
-// const country = require('./country/index.js');
-// router.use('/country', country);
+const country = require('./country/index.js');
+router.use('/country', country);
 
 //신청하기 board의 댓글
 const comment = require('./comment/index.js');

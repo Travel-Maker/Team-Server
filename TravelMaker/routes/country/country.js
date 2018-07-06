@@ -1,50 +1,51 @@
-// const express = require('express');
-// const router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-// const db = require('../../module/pool.js');
+const db = require('../../module/pool.js');
 
-// router.get('/:country_idx', function(req, res) {
-//     let country_idx = req.params.country_idx;
-//     let expert_idx = req.params.user_idx;
-//     let board_idx = req.params.boaard_idx;
+router.get('/:country_idx', async (req, res) => {
+    let country_idx = req.params.country_idx;
 
-//     if (!country_idx) {
-//         console.log("NULL");
-//         res.status(400).send({
-//             message: "Null Value"
-//         })
-//     } else {
-//         let selectCountryQuery = 'SELECT * FROM country WHERE country_idx = ?';
-//         let selectCountry = await db.queryParam_Arr(selectCountryQuery, [country_idx]);
+    if (!country_idx) {
+        res.status(500).send({
+            message : "Null Value : country_idx"
+        });
+    } else {
+         //1. 국가 정보 가져오기
+        let getCountryQuery = 'SELECT * FROM country WHERE country_idx = ?';
+        let getCountryResult = await db.queryParam_Arr(getCountryQuery, country_idx);
+        //console.log(getCountryResult);
 
-//         if (!selectCountry) {
-//             res.status(500).send({
-//                 message : "Internal Server Error"
-//             });
-//         } else if (selectCountry.length == 1) {
-//             console.log("Select Country Success");
-            
-//             let selectExpertQuery = 'SELECT * FROM user WHERE user_expert = TRUE AND user_idx = ?';
-//             let selectExpert = await db.queryParam_Arr(selectExpertQuery, [expert_idx]);
+        if (!getCountryResult) {
+            res.status(500).send({
+                message : "Internal Server Error : select country error"
+            });
+        } else if (getCountryResult.length == 1){
+            let country_name = getCountryResult[0].country_name;
 
-//             let selectBoardQuery = 'SELECT * FROM board WHERE board_idx = ?';
-//             let selectBoard = await db.queryParam_Arr(selectBoardQuery, [board_idx]);
+            let getExpertQuery = 'SELECT * FROM user WHERE expert_city1 LIKE ? OR expert_city2 LIKE ? OR expert_city3 LIKE ?'
+            let getExpertResult = await db.queryParam_Arr(getExpertQuery, [country_name + "%", country_name + "%", country_name + "%"]);
+           // console.log(getExpertResult);
 
-//             if (!selectExpert || !selectBoard) {
-//                 res.status(500).send({
-//                     message : "Internal Server Error"
-//                 });
-//             } else if (selectExpert.length == 1 && selectBoard.length == 1) {
-//                 console.log("Select Expert Success");
-//                 res.status
-//             } else {
-//                 console.log("Select Expert Error or Select Board Error");
-//             }
-            
-//         } else {
-//             console.log("Select Country Error");
-//         }
-//     }
-// });
+            let getBoardQuery = 'SELECT * FROM board WHERE country_idx = ?';
+            let getBoardResult = await db.queryParam_Arr(getBoardQuery, [country_idx]);
+            //console.log(getBoardResult);
 
-// module.exports = router;
+            res.status(200).send({
+                message : "Seccessfully Get Country Data",
+                country_info : getCountryResult,
+                expert_info : getExpertResult,
+                board_info : getBoardResult
+            });
+        } else {
+            res.status(500).send({
+                message : "Internal Server Error"
+            });
+        }
+
+    }
+
+   
+});
+
+module.exports = router;
