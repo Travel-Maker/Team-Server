@@ -20,7 +20,7 @@ router.get('/:review_idx', async (req, res) => {
 
         if (!selectReviewResult) {
             res.status(500).send({
-                message : "Internal Server Error : Select Review"
+                message : "Internal Server Error : Select Review Error"
             });
         } else {
             res.status(200).send({
@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
 
         if (!addReview) {
             res.status(500).send({
-                message : "Internal Server Error : insert review"
+                message : "Internal Server Error : insert review error"
             });
         } else {
             console.log("------평점 바꾸기");
@@ -82,7 +82,7 @@ router.post('/', async (req, res) => {
 
                 if (!updateRateResult) {
                     res.status(500).send({
-                        message : "Internal Server Error : review add"
+                        message : "Internal Server Error : review add error"
                     });
 
                 } else {
@@ -151,7 +151,7 @@ router.put('/', async (req, res) => {
 
                 if (!updateRateResult) {
                     res.status(500).send({
-                        message : "Internal Server Error : review update"
+                        message : "Internal Server Error : review update error"
                     });
 
                 } else {
@@ -211,7 +211,7 @@ router.delete('/', async(req, res) => {
 
                 if (!updateRateResult) {
                     res.status(500).send({
-                        message : "Internal Server Error : review delete"
+                        message : "Internal Server Error : review delete error"
                     });
 
                 } else {

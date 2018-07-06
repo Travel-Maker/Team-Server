@@ -10,13 +10,15 @@ router.post('/', async (req, res) => {
 	let decoded = jwt.verify(token);
 
     let user_idx = decoded.user_idx;
+
+    console.log("expert_idx : " + user_idx);
     
-    let selectPlanQuery = 'SELECT * FROM board WHERE expert_id = ? ORDER BY BOARD_idx DESC';
+    let selectPlanQuery = 'SELECT * FROM board WHERE expert_idx = ? ORDER BY board_idx DESC';
     let selectPlanReault = await db.queryParam_Arr(selectPlanQuery, [user_idx]);
 
     if (!selectPlanReault) {
         res.status(500).send({
-            'message' : "Internal Server Error"
+            'message' : "Internal Server Error : select error"
         });
     } else {
         res.status(200).send({
@@ -34,6 +36,9 @@ router.get('/:board_idx', async (req, res) => {
 
     let selcetPlacesQuery = 'SELECT * FROM plan WHERE board_idx = ?';
     let selcetPlacesResult = await db.queryParam_Arr(selcetPlacesQuery, [board_idx]);
+
+    let updateBoardStatusQuery = 'UPDATE SET board_check = ? WHERE board_idx = ?';
+    let updateBoardStatusResult = await db.queryParam_Arr(updateBoardStatusQuery,[ 1, board_idx]);
 
     console.log("selcetPlacesResult : " + selcetPlacesResult);
 
@@ -67,6 +72,35 @@ router.get('/:board_idx', async (req, res) => {
             totalPlaces : selcetPlacesResult, 
             totalTransportation : selcetTransResult
         });
+    }
+});
+
+//받은 플랜 수락
+router.put('/', async (req, res) => {
+    let token = req.headers.token;
+	let decoded = jwt.verify(token);
+
+    let user_idx = decoded.user_idx;
+    let board_idx = req.body.board_idx;
+
+    if (!user_idx || !board_idx) {
+        res.status(500).send({
+            message : "Null Value"
+        });
+    } else {
+        let acceptBoardQuery = 'UPDATE board SET expert_idx = ? WHERE board_idx = ?';
+        let acceptBoardResult = await db.queryParam_Arr(acceptBoardQuery, [user_idx, board_idx]);
+
+        if (!acceptBoardResult) {
+            res.status(500).send({
+                message : "Internal Server Error : update board error"
+            });
+        } else {
+            res.status(200).send({
+                message : "Successfully Update Borad Data",
+                board_idx : board_idx
+            });
+        }
     }
 });
 module.exports = router;

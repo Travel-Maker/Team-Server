@@ -7,8 +7,7 @@ const db = require('../../module/pool.js');
 router.get('/:country_name', async (req, res) => {
     let country_name = req.params.country_name;
     
-
-    console.log("나라 이름 : " + country_name);
+    //console.log("나라 이름 : " + country_name);
 
     if (!country_name) {
         res.status(500).send({
@@ -20,7 +19,7 @@ router.get('/:country_name', async (req, res) => {
 
         if (!selectExpertResult) {
             res.status(500).send({
-                message : "Internal Server Error : select expert"
+                message : "Internal Server Error : select expert error"
             });
         } else {
             res.status(200).send({
