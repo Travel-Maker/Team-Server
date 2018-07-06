@@ -26,17 +26,18 @@ router.get('/:board_idx', async (req,res) => {
 
 //전문가가 코멘트 작성
 router.post('/', async (req, res) => {
-    let token = req.headers.token;
-    let decoded = jwt.verify(token);
+    // let token = req.headers.token;
+    // let decoded = jwt.verify(token);
 
-    let user_idx = decoded.user_idx;
+    // let user_idx = decoded.user_idx;
+    let user_idx = req.body.user_idx;
     let comment_content = req.body.comment_content;
     let board_idx = req.body.board_idx;
     let comment_writetime = moment().format('YYYY-MM-DD hh:mm:ss');
 
     if(!comment_content || !board_idx || !user_idx){
         res.status(400).send({
-            msg : "Null Value"
+            message : "Null Value"
         })
     } else{
         let insertCommentQuery = "INSERT INTO comment (comment_content, board_idx, user_idx, comment_writetime) VALUES (?,?,?,?)";
@@ -44,11 +45,11 @@ router.post('/', async (req, res) => {
 
         if(!insertCommentResult){
             res.status(500).send({
-                msg : "Internal Server Error : insert comment error"
+                message : "Internal Server Error : insert comment error"
             })
         } else{
             res.status(201).send({
-                msg : "Successfully Register Comment Data" 
+                message : "Successfully Register Comment Data" 
             })
         }
     }
@@ -62,19 +63,19 @@ router.put('/', async (req, res) => {
 
     if(!comment_content || !comment_idx ){
         res.status(400).send({
-            msg : "Null Value : comment update"
+            message : "Null Value : comment update"
         })
     } else{
-        let updateCommentQuery = "UPDATE comment SET (comment_content, comment_writetime) = (?,?) WHERE comment_idx = ?";
+        let updateCommentQuery = "UPDATE comment SET comment_content = ?, comment_writetime = ? WHERE comment_idx = ?";
         let updateCommentResult = await db.queryParam_Arr(updateCommentQuery, [comment_content, comment_writetime, comment_idx]);
 
         if(!updateCommentResult){
             res.status(500).send({
-                msg : "Internal Server Error : update comment error"
+                message : "Internal Server Error : update comment error"
             })
         } else{
             res.status(201).send({
-                msg : "Successfully Update Comment Data" 
+                message : "Successfully Update Comment Data" 
             })
         }
     }
@@ -89,7 +90,7 @@ router.delete('/', async (req, res)=>{
 
 	if(!checkComment){
 		res.status(500).send({
-			msg : "Internal Server Error : Invalid comment_idx"
+			message : "Internal Server Error : Invalid comment_idx"
 		})
 	} else if(checkComment.length == 1){
 		let deleteCommentQuery = "DELETE FROM comment where comment_idx = ?";
@@ -97,11 +98,11 @@ router.delete('/', async (req, res)=>{
 
 		if(!deleteComment){
 			res.status(500).send({
-				msg : "Internal Server Error"
+				message : "Internal Server Error"
 			})
 		} else{
 			res.status(201).send({
-				msg : "Successfully Delete Comment Data"
+				message : "Successfully Delete Comment Data"
 			})
 		}
 	}

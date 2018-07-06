@@ -3,6 +3,7 @@ const router = express.Router();
 
 const db = require('../../module/pool.js');
 
+//신청하기 더보기
 router.get('/:country_idx', async (req, res) => {
     let country_idx = req.params.country_idx;
 
