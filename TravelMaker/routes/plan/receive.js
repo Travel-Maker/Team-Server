@@ -32,6 +32,7 @@ router.post('/', async (req, res) => {
 //받은 플랜 상세보기
 router.get('/:board_idx', async (req, res) => {
     //해당 일정에 대한 플랜과 교통 + 시티
+    //게시글 상태 확인완료(1)로 바꾸기
     let board_idx = req.params.board_idx;
 
     let selcetPlacesQuery = 'SELECT * FROM plan WHERE board_idx = ?';
@@ -77,19 +78,53 @@ router.get('/:board_idx', async (req, res) => {
 
 //받은 플랜 수락
 router.put('/', async (req, res) => {
+    //코인 바꾸고
+    //게시글 상태 바꾸기 : 수락(2)
     let token = req.headers.token;
 	let decoded = jwt.verify(token);
 
-    let user_idx = decoded.user_idx;
+    let expert_idx = decoded.user_idx;    //전문가의 인덱스가 들어옴
+    let user_idx = req.body.user_idx    //board안의 user_idx
     let board_idx = req.body.board_idx;
+    let board_budget = req.body.board_budget;
+
+    let board_status = 2;
 
     if (!user_idx || !board_idx) {
         res.status(500).send({
             message : "Null Value"
         });
     } else {
-        let acceptBoardQuery = 'UPDATE board SET expert_idx = ? WHERE board_idx = ?';
-        let acceptBoardResult = await db.queryParam_Arr(acceptBoardQuery, [user_idx, board_idx]);
+        let idxs = [user_idx, expert_idx];
+
+        //잔고 바꾸기
+        for (var i = 0; i < 2; i++) {
+            let getBudgetQuery = 'SELECT user_budget FROM user WHERE user_idx = ?';
+            let getBudget = await db.queryParam_Arr(getBudgetQuery, [idxs[i]]);
+
+            let budget = getBudget[0].user_budget;
+
+            if (i == 0) {
+                budget -= board_budget;
+                console.log("유저의 잔고 : " + budget);
+            } else {
+                budget += parseInt(board_budget);
+                console.log("전문가의 잔고 : " + budget);
+            }
+
+            let changeBudgetQuery = 'UPDATE user SET user_budget = ? WHERE user_idx = ?';
+            let changeBudgetResult = await db.queryParam_Arr(changeBudgetQuery, [budget, idxs[i]]);
+
+            if (!changeBudgetResult) {
+                res.status(500).send({
+                    message : "Internal Server Error : update user_budget"
+                });
+            }           
+        }
+
+        //신청서 상태 바꾸기
+        let acceptBoardQuery = 'UPDATE board SET board_status = ? WHERE board_idx = ?';
+        let acceptBoardResult = await db.queryParam_Arr(acceptBoardQuery, [ board_status, board_idx]);
 
         if (!acceptBoardResult) {
             res.status(500).send({
@@ -102,5 +137,38 @@ router.put('/', async (req, res) => {
             });
         }
     }
+});
+
+router.delete('/', async (req, res) => {
+    //게시글 상태 : 거절(3)
+    //게시글 ㅋ전문가 인덱스 없애기
+    let token = req.headers.token;
+	let decoded = jwt.verify(token);
+
+    let user_idx = decoded.user_idx;
+    let board_idx = req.body.board_idx;
+
+    let board_status = 3;
+
+    if (!user_idx || !board_idx) {
+        res.status(500).send({
+            message : "Null Value"
+        });
+    } else {
+        let acceptBoardQuery = 'UPDATE board SET expert_idx = null, board_status = ? WHERE board_idx = ?';
+        let acceptBoardResult = await db.queryParam_Arr(acceptBoardQuery, [board_status, board_idx]);
+
+        if (!acceptBoardResult) {
+            res.status(500).send({
+                message : "Internal Server Error : delete board error"
+            });
+        } else {
+            res.status(200).send({
+                message : "Successfully Delete Borad Data",
+                board_idx : board_idx
+            });
+        }
+    }
+
 });
 module.exports = router;

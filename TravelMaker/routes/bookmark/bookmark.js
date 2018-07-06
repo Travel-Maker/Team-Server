@@ -21,8 +21,6 @@ router.post('/', async (req, res) => {
         let selectCountryQuery = 'SELECT country_idx FROM bookmark_country WHERE user_idx = ?';
         let selectCountryResult = await db.queryParam_Arr(selectCountryQuery, [user_idx]);
 
-        console.log(selectCountryResult);
-
         let selectExpertQuery = 'SELECT u.* FROM user as u JOIN bookmark_expert as bme ON u.user_idx = bme.expert_idx WHERE bme.user_idx = ?';
         let selectExpertResult = await db.queryParam_Arr(selectExpertQuery, [user_idx]);
 
