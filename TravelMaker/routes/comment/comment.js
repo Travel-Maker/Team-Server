@@ -35,6 +35,8 @@ router.post('/', async (req, res) => {
     let board_idx = req.body.board_idx;
     let comment_writetime = moment().format('YYYY-MM-DD hh:mm:ss');
 
+    console.log(req.body);
+
     if(!comment_content || !board_idx || !user_idx){
         res.status(400).send({
             message : "Null Value"
