@@ -25,18 +25,11 @@ router.use('/board', board);
 const plan = require('./plan/index.js');
 router.use('/plan', plan);
 
-//일정당 장소
-const place = require('./place/index.js');
-router.use('/place', place);
-
-//장소의 교통수단
-const transportation = require('./transport/index.js');
-router.use('/transportation', transportation);
-
 //북마크 (나라별 북마크, 전문가 북마크)
 const bookmark = require('./bookmark/index.js');
 router.use('/bookmark', bookmark);
 
+//국가 신청하기 board에서 도시 검색
 const search = require('./search/index.js');
 router.use('/search', search);
 

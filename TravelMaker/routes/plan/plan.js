@@ -11,8 +11,6 @@ router.post('/', async (req, res) => {
     let decoded = jwt.verify(token);
 
     let user_idx = decoded.user_idx;
-
-    let expert_idx = req.body.expert_idx;
     let board_idx = req.body.board_idx;
     let plan = req.body.plan;
 
@@ -102,8 +100,6 @@ router.put('/', async (req, res) => {
     let decoded = jwt.verify(token);
 
     let user_idx = decoded.user_idx;
-
-    let expert_idx = req.body.expert_idx;
     let board_idx = req.body.board_idx;
     let plan = req.body.plan;
 

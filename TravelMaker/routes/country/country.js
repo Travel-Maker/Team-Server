@@ -27,8 +27,8 @@ router.get('/:country_idx', async (req, res) => {
             let getExpertResult = await db.queryParam_Arr(getExpertQuery, [country_name + "%", country_name + "%", country_name + "%"]);
            // console.log(getExpertResult);
 
-            let getBoardQuery = 'SELECT * FROM board WHERE country_idx = ?';
-            let getBoardResult = await db.queryParam_Arr(getBoardQuery, [country_idx]);
+           let getBoardQuery = 'SELECT b.board_title, count(*) as comment_count FROM board as b LEFT JOIN comment as c ON b.board_idx = c.board_idx WHERE b.country_idx = ? GROUP BY b.board_title ORDER BY b.board_idx DESC'
+           let getBoardResult = await db.queryParam_Arr(getBoardQuery, [country_idx]);
             //console.log(getBoardResult);
 
             res.status(200).send({

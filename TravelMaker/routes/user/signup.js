@@ -24,6 +24,11 @@ router.post('/', upload.single('user_img'), async (req, res) => {
 
     console.log("id : " + user_id +  " // user_nick : " + user_nick);
 
+    console.log(req.body);
+    console.log("--------------");
+    console.log(req.file);
+
+
     if (!user_id || !user_name || !user_age || !user_gender || !user_nick || !user_email || ! user_style) {
         console.log("NULL");
         res.status(400).send( {
@@ -45,7 +50,7 @@ router.post('/', upload.single('user_img'), async (req, res) => {
             });
         } else {
             //users table에 새로운 user 등록
-            let insertQuery = 'INSERT INTO user (user_id, user_name, user_age, user_gender, user_nick, user_email, user_style, user_img, user_coin) values ( ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            let insertQuery = 'INSERT INTO user (user_id, user_name, user_age, user_gender, user_nick, user_email, user_style, user_img, user_budget) values ( ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             let insertResult = await db.queryParam_Arr(insertQuery, [user_id, user_name, user_age, user_gender, user_nick, user_email, user_style, user_img, basic_coin]);
        
             if (!insertResult) {
