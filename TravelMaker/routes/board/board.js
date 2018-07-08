@@ -24,7 +24,8 @@ router.get('/:country_idx', async (req, res) => {
         } else {
             res.status(200).send({
                 message : "Successfully Get Board",
-                boardData : selectBoardResult
+                boardData : selectBoardResult,
+                country_idx : country_idx
             });
         }
     }
@@ -58,7 +59,7 @@ router.post('/', async (req, res) => {
             message : "Null Value"
         });
     } else {
-        if (expert_idx != null) {   //전문가페이지에서 작성햇을 때
+        if (expert_idx != null) {   //전문가페이지에서 작성했을 때 전문가로 들어올 때는 무조건 country_idx를 가지고 있기 때문에 괜찮음
             let selectExpertQuery = 'SELECT expert_grade FROM user WHERE user_idx = ?';
             let selectExpertResult = await db.queryParam_Arr(selectExpertQuery, [expert_idx]);
 
@@ -66,6 +67,7 @@ router.post('/', async (req, res) => {
 
             let expert_grade = selectExpertResult[0].expert_grade;  //전문가 등급
             board_coin = calcBoardCoin(expert_grade, board_days);  //전문가 등급에 따른 코인 계산
+            //
         }
         
         //국가 페이지에서 작성했을 때
@@ -132,49 +134,7 @@ router.put('/', async (req, res) => {
             message : "Null Value"
         });
     } else {
-        if (expert_idx != null) {   //전문가페이지에서 작성햇을 때
-            let selectExpertQuery = 'SELECT expert_grade FROM user WHERE user_idx = ?';
-            let selectExpertResult = await db.queryParam_Arr(selectExpertQuery, [expert_idx]);
-
-            console.log(selectExpertResult);
-
-            let expert_grade = selectExpertResult[0].expert_grade;  //전문가 등급
-            board_coin = calcBoardCoin(expert_grade, board_days);  //전문가 등급에 따른 코인 계산
-        }
         
-        //국가 페이지에서 작성했을 때
-        let createBoardQuery = 'INSERT INTO board (country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_coin, board_writetime) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        let createBoardResult =  await db.queryParam_Arr(createBoardQuery, [country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_coin, board_writetime]);
-    
-        if (!createBoardResult) {
-            res.status(500).send({
-                message : "Internal Server Error : insert board error"
-            });
-        } else {
-            board_idx = createBoardResult.insertId;
-
-            console.log("board_idx : " + board_idx);
-
-            let plan_in = board_plan[0].in;
-            let acommondations = board_plan[0].acc;
-            let plan_out = board_plan[0].out;
-
-            for (var i = 0; i < plan_in.length; i++) {
-                let plan_count = i + 1;
-                let insertPlanQuery = 'INSERT INTO plan VALUES (null, ?, ?, ?, ?, ?, ?)';
-                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [country_idx, plan_count, plan_in[i], acommondations[i], plan_out[i], board_idx]);
-
-                if (!insertPlanResult) {
-                    res.status(500).send({
-                        message : "Invalild Server Error : insert plan"
-                    });
-                }
-            }
-        }
-        res.status(200).send({
-            message : "Successfully Create Board Data",
-            board_idx : board_idx
-        });
     
     }
 

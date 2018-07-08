@@ -4,15 +4,23 @@ const router = express.Router();
 const db = require('../../module/pool.js');
 const jwt = require('../../module/jwt.js');
 
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const aws = require('aws-sdk');
+const s3 = new aws.S3();
+aws.config.loadFromPath('./config/aws_config.json');
+const upload = require('../../config/multer.js');
 
-//계획서 작성
-router.post('/', async (req, res) => {
+let location = 0; 
+
+//계획서 작성 : 완료
+router.post('/', upload.array('place_img') , async (req, res) => {
     let token = req.headers.token;
     let decoded = jwt.verify(token);
 
     let user_idx = decoded.user_idx;
-    let board_idx = req.body.board_idx;
-    let plan = req.body.plan;
+    let board_idx = parseInt(req.body.board_idx);
+    let plan = JSON.parse(req.body.plan);
 
     // console.log(req.body);
     // console.log("-------------body 안의 plan");
@@ -43,8 +51,8 @@ router.post('/', async (req, res) => {
                 });
             } else {
                 let insertPlaceQuery = 'INSERT INTO place VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_img, board_idx]);
-            
+                let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, null, board_idx]);
+
                 if (place[j].place_budget) {
                     totalBudget += parseInt(place[j].place_budget);
                 }
@@ -54,6 +62,22 @@ router.post('/', async (req, res) => {
                         messgae : "Internal Server Error : insert place"
                     });
                 } 
+            }
+        }
+
+        //해당 장소에 이미지 넣기 
+        for (var j = 0; j < place.length; j++) {
+            let place_count = j + 1;
+            if (place[j].image == 1) {
+                let updateImageQuery = 'UPDATE place SET place_img = ? WHERE board_idx = ? AND place_day = ? AND place_count = ?';
+                let updateImageResult = await db.queryParam_Arr(updateImageQuery, [req.files[location].location, board_idx, place_day, place_count]);
+
+                if (!updateImageResult) {
+                    res.status(500).send({
+                        message : "Invaild Server Error : upload image"
+                    });
+                }
+            location++;
             }
         }
 
@@ -78,7 +102,8 @@ router.post('/', async (req, res) => {
                 } 
             }
         }
-    }  
+    } 
+
     let setBoardBudgetQuery = 'UPDATE board SET board_budget = ? WHERE board_idx = ?';
     let setBoardBudgetResult = await db.queryParam_Arr(setBoardBudgetQuery, [totalBudget, board_idx]);
 
@@ -100,8 +125,8 @@ router.put('/', async (req, res) => {
     let decoded = jwt.verify(token);
 
     let user_idx = decoded.user_idx;
-    let board_idx = req.body.board_idx;
-    let plan = req.body.plan;
+    let board_idx = parseInt(req.body.board_idx);
+    let plan = JSON.parse(req.body.plan);
 
     let totalBudget = 0;
 
@@ -116,9 +141,9 @@ router.put('/', async (req, res) => {
 
         let past_place_cnt = parseInt(cntPastPlaceResult[0].pp);
 
-
         //전체 place 관광지 수정
-        for (var j = 0; j < place.length; j++) {
+        var j = 0;
+        for (j = 0; j < place.length; j++) {
             let place_count = j + 1;
 
             if (!place[j].place_latitude || !place[j].place_longitude) {
@@ -128,7 +153,7 @@ router.put('/', async (req, res) => {
             } else {
                 if (j < past_place_cnt) {  //기존의 장소 수정
                     let updatePlaceQuery = 'UPDATE place SET place_name = ?, place_comment = ?, place_latitude = ?, place_longitude = ?, place_budget = ?, place_img = ? WHERE board_idx =? AND place_day = ? AND place_count = ?';
-                    let updatePlaceResult = await db.queryParam_Arr(updatePlaceQuery, [place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_img, board_idx, place_day, place_count]);
+                    let updatePlaceResult = await db.queryParam_Arr(updatePlaceQuery, [place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, null, board_idx, place_day, place_count]);
 
                     if (place[j].place_budget) {
                         totalBudget += parseInt(place[j].place_budget);
@@ -141,7 +166,7 @@ router.put('/', async (req, res) => {
                     } 
                 } else {    //수정 시 새로운 장소 추가
                     let insertPlaceQuery = 'INSERT INTO place VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                    let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_img, board_idx]);
+                    let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, null, board_idx]);
                 
                     if (place[j].place_budget) {
                         totalBudget += parseInt(place[j].place_budget);
@@ -154,6 +179,20 @@ router.put('/', async (req, res) => {
                     } 
                 }
             }
+            
+            //수정 시 장소가 줄어들었을 때
+            if (j <= past_place_cnt) {
+                for (; j <= past_place_cnt; j++) {
+                    let deletePlaceQuery = 'DELETE FROM palce WHERE board_idx = ? AND place_day = ? AND place_count = ?';
+                    let deletePlaceResult = await db.queryParam_Arr(deletePlaceQuery, [board_idx, place_count, j]);
+
+                    if (!deletePlaceResult) {
+                        res.status(500).send({
+                            message : "Invaild Server Error"
+                        });
+                    }
+                }
+            }
         }
 
         let cntPastTransQuery = 'SELECT COUNT(*) as pt FROM transportation WHERE board_idx = ? AND trans_day = ?';
@@ -162,7 +201,7 @@ router.put('/', async (req, res) => {
         let past_trans_cnt = parseInt(cntPastTransResult[0].pt);
 
         //전체 trans 입력
-        for (var j = 0; j < trans.length; j++) {
+        for (j = 0; j < trans.length; j++) {
             if (!trans[j].trans_dep_time || !trans[j].trans_arr_time) {
                 res.status(500).send({
                     message : "Null Value : longtitude and latitude"
@@ -192,6 +231,19 @@ router.put('/', async (req, res) => {
                     if (!insertTransResult) {
                         res.status(500).send({
                             messgae : "Internal Server Error : insert transpostation"
+                        });
+                    }
+                }
+            }
+
+            if (j <= past_trans_cnt) {
+                for (; j <= past_trans_cnt; j++) {
+                    let deletePlaceQuery = 'DELETE FROM transportation WHERE board_idx = ? AND place_day = ? AND place_count = ?';
+                    let deletePlaceResult = await db.queryParam_Arr(deletePlaceQuery, [board_idx, place_count, j]);
+
+                    if (!deletePlaceResult) {
+                        res.status(500).send({
+                            message : "Invaild Server Error"
                         });
                     }
                 }

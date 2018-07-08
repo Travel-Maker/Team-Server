@@ -9,9 +9,8 @@ router.post('/', async (req, res) => {
     let token = req.headers.token;
 	let decoded = jwt.verify(token);
 
-    // let user_idx = decoded.user_idx;
-    let user_idx = req.body.user_idx;
-
+    let user_idx = decoded.user_idx;
+    
     if (!user_idx) {
         console.log("NULL");
         res.status(400).send( {
@@ -36,7 +35,11 @@ router.post('/', async (req, res) => {
 
 //전문가 신청
 router.put('/', async (req, res) => {
-    let user_idx = req.body.user_idx;
+    let token = req.headers.token;
+	let decoded = jwt.verify(token);
+
+    let user_idx = decoded.user_idx;
+
     let expert_city = req.body.expert_city;
 
     console.log("user_idx" + user_idx + " // expert_city input : " + expert_city);
@@ -67,6 +70,34 @@ router.put('/', async (req, res) => {
         } else {
             res.status(201).send({
                 message : "Successfully Update User Data"
+            });
+        }
+    }
+});
+
+router.put('/', async (req, res) => {
+    let token = req.headers.token;
+	let decoded = jwt.verify(token);
+
+    let user_idx = decoded.user_idx;
+    let expert_idx = req.body.expert_idx;
+    let board_idx = req.body.board_idx;
+
+    if (!expert_idx || !board_idx || !country_idx) {
+        res.status(500).send({
+            message : "Null Value"
+        });
+    } else {
+        let updateBoardQuery = 'UPDATE board SET expert_idx = ? WHERE user_idx = ? AND board_idx = ?';
+        let updateBoardResult = await db.queryParam_Arr(updateBoardQuery, [expert_idx, user_idx, board_idx]);
+
+        if (!updateBoardResult) {
+            res.status(500).send({
+                message : "Invaild Server Error : set expert"
+            });
+        } else {
+            res.status(200).send({
+                message : "Successfully Update Expert"
             });
         }
     }

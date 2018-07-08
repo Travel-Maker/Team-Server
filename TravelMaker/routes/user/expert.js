@@ -4,8 +4,9 @@ const router = express.Router();
 const db = require('../../module/pool.js');
 
 //해당 나라의 전문가 보이기
-router.get('/:country_name', async (req, res) => {
-    let country_name = req.params.country_name;
+router.post('/', async (req, res) => {
+    let country_idx = req.body.country_idx
+    let country_name = req.body.country_name;
     
     //console.log("나라 이름 : " + country_name);
 
@@ -24,7 +25,8 @@ router.get('/:country_name', async (req, res) => {
         } else {
             res.status(200).send({
                 message : "Succeddfully Get Expert Data",
-                expert : selectExpertResult
+                expert : selectExpertResult,
+                country_idx : country_idx
             });
         }
     }
