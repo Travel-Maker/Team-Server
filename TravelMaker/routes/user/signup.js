@@ -17,8 +17,13 @@ router.post('/', upload.single('user_img'), async (req, res) => {
     let user_gender = req.body.user_gender;
     let user_nick = req.body.user_nick;
     let user_email = req.body.user_email;
-    let user_style = req.body.user_style;
-    let user_img = req.file.location;
+    let user_style = parseInt(req.body.user_style);
+    let user_img = null;
+
+    if (req.file != undefined) {
+        user_img = req.file.location;
+    }
+    
 
     let basic_coin = 500;
 
