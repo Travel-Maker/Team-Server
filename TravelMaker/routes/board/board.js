@@ -54,7 +54,7 @@ router.post('/', async (req, res) => {
     let expert_idx = req.body.expert_idx   //전문가 페이지에서 작성했을시
     let board_idx;
 
-    if (!user_idx || !board_title || !board_city || !board_dep_time || !board_arr_time || !board_content || !board_plan || !country_idx) {
+    if (!user_idx || !board_title || !board_city || !board_dep_time || !board_arr_time || !board_plan || !country_idx) {
         res.status(500).send({
             message : "Null Value"
         });

@@ -9,6 +9,13 @@ router.use('/', plan);
 const receive = require('./receive.js');
 router.use('/receive', receive);
 
+//계획서 보기
+const view = require('./view.js');
+router.use('/view', view);
+
+//보낸 신청서 관리
+const send = require('./send.js');
+router.use('/send', send);
 
 
 module.exports = router;
