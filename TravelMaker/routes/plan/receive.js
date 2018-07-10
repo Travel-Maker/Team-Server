@@ -32,9 +32,8 @@ router.post('/', async (req, res) => {
 //받은 플랜 상세보기
 router.get('/:board_idx', async (req, res) => {
     //해당 일정에 대한 플랜과 교통 + 시티
-    //게시글 상태 확인완료(1)로 바꾸기
     let board_idx = req.params.board_idx;
-    let board_status = 0
+    let board_status = 0;
 
     let selcetPlacesQuery = 'SELECT * FROM plan WHERE board_idx = ?';
     let selcetPlacesResult = await db.queryParam_Arr(selcetPlacesQuery, [board_idx]);
@@ -92,7 +91,7 @@ router.put('/', async (req, res) => {
     let board_status = 2;
 
     if (!user_idx || !board_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value"
         });
     } else {
@@ -152,7 +151,7 @@ router.delete('/', async (req, res) => {
     let board_status = 3;
 
     if (!user_idx || !board_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value"
         });
     } else {

@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
     //expert 북마크는 유저 정보 주기
 
     if (!user_idx) {
-        res.status(403).send({
+        res.status(400).send({
             message : "Null Value : No user_idx input"
         });
     } else {

@@ -8,7 +8,7 @@ router.get('/:board_idx', async (req, res) => {
     let board_idx = req.params.board_idx;
 
     if (!board_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value : board index"
         });
     } else {

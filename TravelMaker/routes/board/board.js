@@ -10,11 +10,11 @@ router.get('/:country_idx', async (req, res) => {
     let country_idx = req.params.country_idx;
 
     if (!country_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value : country_idx"
         });
     } else {
-        let selectBoardQuery = 'SELECT b.board_title, count(*) as comment_count FROM board as b LEFT JOIN comment as c ON b.board_idx = c.board_idx WHERE b.country_idx = ? GROUP BY b.board_title ORDER BY b.board_idx DESC'
+        let selectBoardQuery = 'SELECT b.board_idx, b.board_title, count(*) as comment_count FROM board as b LEFT JOIN comment as c ON b.board_idx = c.board_idx WHERE b.country_idx = ? GROUP BY b.board_title ORDER BY b.board_idx DESC'
         let selectBoardResult = await db.queryParam_Arr(selectBoardQuery, [country_idx]);
 
         let selectUserInfoQuery = 'SELECT * FROM user as u WHERE u.user_idx in (SELECT user_idx FROM board WHERE country_idx = ?)';
@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
     let board_idx;
 
     if (!user_idx || !board_title || !board_city || !board_dep_time || !board_arr_time || !board_plan || !country_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value"
         });
     } else {
@@ -112,12 +112,13 @@ router.post('/', async (req, res) => {
     }
 });
 
-//신청서 수정 : 미완성
+//신청서 수정 : 완성같은 미완성
 router.put('/', async (req, res) => {
     let token = req.headers.token;
     let decoded = jwt.verify(token);
 
     let user_idx = decoded.user_idx;
+    let board_idx = req.body.board_idx;
     let board_title = req.body.board_title;
     let board_city = req.body.board_city;
     let board_dep_time = req.body.board_dep_time;
@@ -132,13 +133,42 @@ router.put('/', async (req, res) => {
     let board_plan = req.body.board_plan;   //plan을 담은 배열
     let country_idx = req.body.country_idx; //나라 상세보기에서 했을 시
     let expert_idx = req.body.expert_idx   //전문가 페이지에서 작성했을시
-    let board_idx;
 
     if (!user_idx || !board_title || !board_city || !board_dep_time || !board_arr_time || !board_content || !board_plan || !country_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value"
         });
     } else {
+        let updateBoardQuery = 'UPDATE board SET country_idx = ?, user_idx = ?, expert_idx = ?, board_title = ?, board_city = ?, board_dep_time = ?, board_arr_time = ?, board_content = ?, board_status = ?, board_coin = ?, board_writetime = ? WHERE board_idx = ?';
+        let updateBoardResult = await db.queryParam_Arr(updateBoardQuery, [country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_coin, board_writetime, board_idx]);
+        
+        if (!updateBoardResult) {
+            res.status(500).send({
+                message : "Invaild Server Error : update board"
+            });
+        } else {
+            let plan_in = board_plan[0].in;
+            let acommondations = board_plan[0].acc;
+            let plan_out = board_plan[0].out;
+
+            for (var i = 0; i < plan_in.length; i++) {
+                let plan_count = i + 1;
+                let insertPlanQuery = 'UPDATE plan SET plan_in = ?, plan_acc_name = ?, plan_out = ? WHERE plan_count = ? AND board_idx = ?';
+                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [plan_in[i], acommondations[i], plan_out[i], plan_count, board_idx]);
+
+                if (!insertPlanResult) {
+                    res.status(500).send({
+                        message : "Invalild Server Error : update plan"
+                    });
+                }
+            }
+
+            res.status(200).send({
+                message : "Successfully Update Board Data",
+                board_idx : board_idx
+            });
+
+        }
         
     
     }

@@ -7,7 +7,7 @@ router.get('/:country_idx', async (req, res) => {
     let country_idx = req.params.country_idx;
 
     if (!country_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value : country_idx"
         });
     } else {
@@ -27,7 +27,7 @@ router.get('/:country_idx', async (req, res) => {
             let getExpertResult = await db.queryParam_Arr(getExpertQuery, [country_name + "%", country_name + "%", country_name + "%"]);
            // console.log(getExpertResult);
 
-           let getBoardQuery = 'SELECT b.board_title, count(*) as comment_count FROM board as b LEFT JOIN comment as c ON b.board_idx = c.board_idx WHERE b.country_idx = ? GROUP BY b.board_title ORDER BY b.board_idx DESC'
+           let getBoardQuery = 'SELECT b.board_idx, b.board_title, count(*) as comment_count FROM board as b LEFT JOIN comment as c ON b.board_idx = c.board_idx WHERE b.country_idx = ? GROUP BY b.board_title ORDER BY b.board_idx DESC'
            let getBoardResult = await db.queryParam_Arr(getBoardQuery, [country_idx]);
             //console.log(getBoardResult);
 

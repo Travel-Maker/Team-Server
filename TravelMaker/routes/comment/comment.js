@@ -9,6 +9,12 @@ const jwt = require('../../module/jwt.js');
 router.get('/:board_idx', async (req,res) => {
     let board_idx = req.params.board_idx;
 
+    if (!board_idx) {
+        res.status(400).send({
+            message : "Null Value : board index"
+        });
+    }
+
     let getCommentQuery = "SELECT * FROM comment where board_idx = ? ORDER BY comment_idx DESC";
     let getComment = await db.queryParam_Arr(getCommentQuery, [board_idx]);
 

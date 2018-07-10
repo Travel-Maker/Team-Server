@@ -10,7 +10,7 @@ router.post('/', async (req, res) => {
     console.log(board_city);
 
     if (!board_city || !country_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value : board city"
         });
     } else {

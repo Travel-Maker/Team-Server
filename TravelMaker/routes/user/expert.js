@@ -11,7 +11,7 @@ router.post('/', async (req, res) => {
     //console.log("나라 이름 : " + country_name);
 
     if (!country_name) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value : country name"
         });
     } else {
