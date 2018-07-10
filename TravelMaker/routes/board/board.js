@@ -17,7 +17,11 @@ router.get('/:country_idx', async (req, res) => {
         let selectBoardQuery = 'SELECT b.board_title, count(*) as comment_count FROM board as b LEFT JOIN comment as c ON b.board_idx = c.board_idx WHERE b.country_idx = ? GROUP BY b.board_title ORDER BY b.board_idx DESC'
         let selectBoardResult = await db.queryParam_Arr(selectBoardQuery, [country_idx]);
 
-        if (!selectBoardResult) {
+        let selectUserInfoQuery = 'SELECT * FROM user as u WHERE u.user_idx in (SELECT user_idx FROM board WHERE country_idx = ?)';
+        let selectUserInfoResult = await db.queryParam_Arr(selectUserInfoQuery, [country_idx]);
+
+
+        if (!selectBoardResult || !selectUserInfoResult) {
             res.status(500).send({
                 message : "Internal Server Error : Select Board"
             });
@@ -25,6 +29,7 @@ router.get('/:country_idx', async (req, res) => {
             res.status(200).send({
                 message : "Successfully Get Board",
                 boardData : selectBoardResult,
+                user_in_board_data : selectUserInfoResult,
                 country_idx : country_idx
             });
         }

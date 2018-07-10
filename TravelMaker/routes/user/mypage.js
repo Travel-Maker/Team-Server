@@ -43,6 +43,8 @@ router.put('/', async (req, res) => {
     let expert_city = req.body.expert_city;
 
     console.log("user_idx" + user_idx + " // expert_city input : " + expert_city);
+    console.log(expert_city);
+
 
     if (!user_idx) {
         res.status(400).send({
@@ -50,7 +52,7 @@ router.put('/', async (req, res) => {
         });
     } else {
         for (var i = 0; i < expert_city.length; i++) {
-            let insertExpertQuery = "UPDATE user SET expert_city" + i +" = ? WHERE user_idx = ?";
+            let insertExpertQuery = "UPDATE user SET expert_city" + (i + 1) +" = ? WHERE user_idx = ?";
             let insertExpert = await db.queryParam_Arr(insertExpertQuery, [ expert_city[i], user_idx]);
 
             if (!insertExpert) {
@@ -60,8 +62,8 @@ router.put('/', async (req, res) => {
             }
         }
 
-        let changeToExpertQuery = 'UPDATE user SET user_expert = 1 WHERE' + user_idx;
-        let changeToExpertResult = await db.queryParam_None(changeToExpertQuery);
+        let changeToExpertQuery = 'UPDATE user SET user_expert = 1 WHERE user_idx = ?';
+        let changeToExpertResult = await db.queryParam_Arr(changeToExpertQuery, [user_idx]);
         
         if (!changeToExpertResult) {
             res.status(500).send({

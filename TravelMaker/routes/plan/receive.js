@@ -34,12 +34,13 @@ router.get('/:board_idx', async (req, res) => {
     //해당 일정에 대한 플랜과 교통 + 시티
     //게시글 상태 확인완료(1)로 바꾸기
     let board_idx = req.params.board_idx;
+    let board_status = 0
 
     let selcetPlacesQuery = 'SELECT * FROM plan WHERE board_idx = ?';
     let selcetPlacesResult = await db.queryParam_Arr(selcetPlacesQuery, [board_idx]);
 
     let updateBoardStatusQuery = 'UPDATE SET board_check = ? WHERE board_idx = ?';
-    let updateBoardStatusResult = await db.queryParam_Arr(updateBoardStatusQuery,[ 1, board_idx]);
+    let updateBoardStatusResult = await db.queryParam_Arr(updateBoardStatusQuery,[ board_status, board_idx]);
 
     console.log("selcetPlacesResult : " + selcetPlacesResult);
 

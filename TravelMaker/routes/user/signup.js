@@ -64,7 +64,7 @@ router.post('/', upload.single('user_img'), async (req, res) => {
                     massage : "Internal Server Error : DB Insert"
                 })
             } else {    //정상적으로 회원가입 완료
-                console.log("Signin Success");
+                console.log("Signup Success");
                 res.status(201).send ( {
                     message : "Successfully Sign up"
                 })

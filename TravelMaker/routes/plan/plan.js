@@ -11,7 +11,7 @@ const s3 = new aws.S3();
 aws.config.loadFromPath('./config/aws_config.json');
 const upload = require('../../config/multer.js');
 
-let location = 0; 
+ 
 
 //계획서 작성 : 완료
 router.post('/', upload.array('place_img') , async (req, res) => {
@@ -27,6 +27,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
     // console.log(plan);
 
     let totalBudget = 0;
+    let location = 0;
 
     for (var i = 0; i < plan.length; i++) {
         let place = plan[i].place;     //n day에 갈 장소들
@@ -50,8 +51,8 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                     message : "Null Value : longtitude and latitude"
                 });
             } else {
-                let insertPlaceQuery = 'INSERT INTO place VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, null, board_idx]);
+                let insertPlaceQuery = 'INSERT INTO place VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_budget_comment, null, board_idx]);
 
                 if (place[j].place_budget) {
                     totalBudget += parseInt(place[j].place_budget);
@@ -66,18 +67,20 @@ router.post('/', upload.array('place_img') , async (req, res) => {
         }
 
         //해당 장소에 이미지 넣기 
-        for (var j = 0; j < place.length; j++) {
-            let place_count = j + 1;
-            if (place[j].image == 1) {
-                let updateImageQuery = 'UPDATE place SET place_img = ? WHERE board_idx = ? AND place_day = ? AND place_count = ?';
-                let updateImageResult = await db.queryParam_Arr(updateImageQuery, [req.files[location].location, board_idx, place_day, place_count]);
+        if (req.files != undefined) {
+            for (var j = 0; j < place.length; j++) {
+                let place_count = j + 1;
+                if (place[j].image == 1) {
+                    let updateImageQuery = 'UPDATE place SET place_img = ? WHERE board_idx = ? AND place_day = ? AND place_count = ?';
+                    let updateImageResult = await db.queryParam_Arr(updateImageQuery, [req.files[location].location, board_idx, place_day, place_count]);
 
-                if (!updateImageResult) {
-                    res.status(500).send({
-                        message : "Invaild Server Error : upload image"
-                    });
+                    if (!updateImageResult) {
+                        res.status(500).send({
+                            message : "Invaild Server Error : upload image"
+                        });
+                    }
+                location++;
                 }
-            location++;
             }
         }
 
@@ -152,8 +155,8 @@ router.put('/', async (req, res) => {
                 });
             } else {
                 if (j < past_place_cnt) {  //기존의 장소 수정
-                    let updatePlaceQuery = 'UPDATE place SET place_name = ?, place_comment = ?, place_latitude = ?, place_longitude = ?, place_budget = ?, place_img = ? WHERE board_idx =? AND place_day = ? AND place_count = ?';
-                    let updatePlaceResult = await db.queryParam_Arr(updatePlaceQuery, [place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, null, board_idx, place_day, place_count]);
+                    let updatePlaceQuery = 'UPDATE place SET place_name = ?, place_comment = ?, place_latitude = ?, place_longitude = ?, place_budget = ?, place_budget_comment = ?, place_img = ? WHERE board_idx =? AND place_day = ? AND place_count = ?';
+                    let updatePlaceResult = await db.queryParam_Arr(updatePlaceQuery, [place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_budget_comment, null, board_idx, place_day, place_count]);
 
                     if (place[j].place_budget) {
                         totalBudget += parseInt(place[j].place_budget);
