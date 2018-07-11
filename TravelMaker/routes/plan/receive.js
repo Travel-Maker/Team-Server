@@ -13,17 +13,36 @@ router.post('/', async (req, res) => {
 
     console.log("expert_idx : " + user_idx);
     
-    let selectPlanQuery = 'SELECT * FROM board WHERE expert_idx = ? ORDER BY board_idx DESC';
-    let selectPlanReault = await db.queryParam_Arr(selectPlanQuery, [user_idx]);
+    let selectPlanQuery = 'SELECT board_idx, board_title FROM board WHERE expert_idx = ? ORDER BY board_idx DESC';
+    let selectPlanResult = await db.queryParam_Arr(selectPlanQuery, [user_idx]);
 
-    if (!selectPlanReault) {
+    let receiveBoards = new Array();
+
+    if (!selectPlanResult) {
         res.status(500).send({
             'message' : "Internal Server Error : select error"
         });
     } else {
+        for (var i = 0; i < selectPlanResult.length; i++) {
+            let selectUserNickQuery = 'SELECT user_nick FROM user WHERE user_idx = (SELECT user_idx FROM board WHERE board_idx = ?)';
+            let selectUserNickResult = await db.queryParam_Arr(selectUserNickQuery, [selectPlanResult[i].board_idx]);
+
+            if (!selectUserNickResult) {
+                res.status(500).send({
+                    message : "Invaild Server Error : select nickname error"
+                });
+            } else {
+                let board = {
+                    "user_nick" : selectUserNickResult[0].user_nick,
+                    "board_data" : selectPlanResult[i]
+                }
+
+                receiveBoards[i] = board;  
+            } 
+        }
         res.status(200).send({
             message : "Successful Get Board Data",
-            receive_board : selectPlanReault
+            receive_board : receiveBoards
         });
         
     }
@@ -31,48 +50,34 @@ router.post('/', async (req, res) => {
 
 //받은 플랜 상세보기
 router.get('/:board_idx', async (req, res) => {
-    //해당 일정에 대한 플랜과 교통 + 시티
     let board_idx = req.params.board_idx;
-    let board_status = 0;
 
-    let selcetPlacesQuery = 'SELECT * FROM plan WHERE board_idx = ?';
-    let selcetPlacesResult = await db.queryParam_Arr(selcetPlacesQuery, [board_idx]);
-
-    let updateBoardStatusQuery = 'UPDATE SET board_check = ? WHERE board_idx = ?';
-    let updateBoardStatusResult = await db.queryParam_Arr(updateBoardStatusQuery,[ board_status, board_idx]);
-
-    console.log("selcetPlacesResult : " + selcetPlacesResult);
-
-    if (!selcetPlacesResult) {
-        console.log("place select error");
-        res.status(500).send({
-            message : "Internal Server Error : select places"
+    if (!board_idx) {
+        res.status(400).send({
+            message : "Null Value : board index"
         });
     } else {
-        let selectCityQuery = 'SELECT * FROM city WHERE city_idx = ?';
-        let selectCityResult = await db.queryParam_Arr(selectCityQuery, [selectCityQuery]); //특정 board에 해당하는 city이름 가져옴
+        let selectUserNickQuery = 'SELECT user_nick FROM user WHERE user_idx = (SELECT user_idx FROM board WHERE board_idx = ?)';
+        let selectUserNickResult = await db.queryParam_Arr(selectUserNickQuery, [board_idx]);
 
-        let selcetTransQuery = 'SELECT * FROM transportation WHERE place_idx = ?';  //특정 board에 해당하는 일정들 모두 불러오기
-        let selcetTransResult;
+        let selectBoardQuery = 'SELECT * FROM board WHERE board_idx = ?';
+        let selectBoardResult = await db.queryParam_Arr(selectBoardQuery, [board_idx]);
 
-        for (var i = 0; i < selectPlanReault.length; i++) {
-            let selectResult = await db.queryParam_Arr(selcetTransQuery, [selcetPlacesResult[i].place_idx]);    //모든 일정에 대한 교통수단 불러오기
-            
-            if (!selectResult) {
-                console.log("transportation select error");
-                res.status(500).send({
-                    message : "Internal Server Error : select transportation"
-               });
-            } else {
-                selcetTransResult.push(selectResult);
-            }
+        let selectPlanQuery = 'SELECT * FROM plan WHERE board_idx = ?';
+        let selectPlanResult = await db.queryParam_Arr(selectPlanQuery, [board_idx]);
+
+        if (!selectBoardResult || !selectPlanResult || !selectUserNickResult) {
+            res.status(500).send({
+                message : "Invaild Server Error : select total board date"
+            });
+        } else {
+            res.status(200).send({
+                message : "Successfully Get Total Board Data", 
+                sender : selectUserNickResult,
+                board : selectBoardResult,
+                plan : selectPlanResult
+            });
         }
-
-        res.status(200).send({
-            message : "Successfully Get Comment Places",
-            totalPlaces : selcetPlacesResult, 
-            totalTransportation : selcetTransResult
-        });
     }
 });
 

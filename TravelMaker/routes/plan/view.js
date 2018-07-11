@@ -39,8 +39,8 @@ router.get('/:board_idx', async(req, res) => {
         }
 
         let nday_plan = {
-            place : selectPlaceResult,
-            trans : selectTrsnaResult
+            "place" : selectPlaceResult,
+            "trans" : selectTrsnaResult
         }
 
         total_plan[i] = nday_plan;
