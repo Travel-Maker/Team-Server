@@ -12,6 +12,9 @@ router.get('/:board_idx', async (req, res) => {
             message : "Null Value : board index"
         });
     } else {
+        let selectUserNickQuery = 'SELECT user_nick FROM user WHERE user_idx = (SELECT user_idx FROM board WHERE board_idx = ?)';
+        let selectUserNickResult = await db.queryParam_Arr(selectUserNickQuery, [board_idx]);
+
         let selectBoardQuery = 'SELECT * FROM board WHERE board_idx = ?';
         let selectBoardResult = await db.queryParam_Arr(selectBoardQuery, [board_idx]);
 
@@ -28,6 +31,7 @@ router.get('/:board_idx', async (req, res) => {
         } else {
             res.status(200).send({
                 message : "Successfully Get Total Board Data", 
+                sender : selectUserNickResult,
                 board : selectBoardResult,
                 plan : selectPlanResult,
                 comment : selectCommentResult

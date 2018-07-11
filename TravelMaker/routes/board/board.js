@@ -94,8 +94,8 @@ router.post('/', async (req, res) => {
 
             for (var i = 0; i < plan_in.length; i++) {
                 let plan_count = i + 1;
-                let insertPlanQuery = 'INSERT INTO plan VALUES (null, ?, ?, ?, ?, ?, ?)';
-                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [country_idx, plan_count, plan_in[i], acommondations[i], plan_out[i], board_idx]);
+                let insertPlanQuery = 'INSERT INTO plan VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?)';
+                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [country_idx, plan_count, plan_in[i].plan_in, plan_in[i].plan_in_date, acommondations[i], plan_out[i].plan_out, plan_out[i].plan_out_date, board_idx]);
 
                 if (!insertPlanResult) {
                     res.status(500).send({
@@ -153,8 +153,8 @@ router.put('/', async (req, res) => {
 
             for (var i = 0; i < plan_in.length; i++) {
                 let plan_count = i + 1;
-                let insertPlanQuery = 'UPDATE plan SET plan_in = ?, plan_acc_name = ?, plan_out = ? WHERE plan_count = ? AND board_idx = ?';
-                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [plan_in[i], acommondations[i], plan_out[i], plan_count, board_idx]);
+                let insertPlanQuery = 'UPDATE plan SET plan_in = ?, plan_in_date = ?, plan_acc_name = ?, plan_out = ?, plan_out_date = ? WHERE plan_count = ? AND board_idx = ?';
+                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [plan_in[i].plan_in, plan_in[i].plan_in_date, acommondations[i], plan_out[i].plan_out, plan_out[i].plan_out_date, plan_count, board_idx]);
 
                 if (!insertPlanResult) {
                     res.status(500).send({
