@@ -18,7 +18,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
     let token = req.headers.token;
     let decoded = jwt.verify(token);
 
-    let user_idx = decoded.user_idx;
+    let expert_idx = decoded.user_idx;    //전문가 인덱스
     let board_idx = parseInt(req.body.board_idx);
     let plan = JSON.parse(req.body.plan);
 
@@ -27,7 +27,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
     // console.log(plan);
 
     let totalBudget = 0;
-    let location = 0;
+    let img_location = 0;
 
     if (!board_idx || !plan) {
         res.status(400).send({
@@ -77,14 +77,14 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                     let place_count = j + 1;
                     if (place[j].image == 1) {
                         let updateImageQuery = 'UPDATE place SET place_img = ? WHERE board_idx = ? AND place_day = ? AND place_count = ?';
-                        let updateImageResult = await db.queryParam_Arr(updateImageQuery, [req.files[location].location, board_idx, place_day, place_count]);
+                        let updateImageResult = await db.queryParam_Arr(updateImageQuery, [req.files[img_location].location, board_idx, place_day, place_count]);
 
                         if (!updateImageResult) {
                             res.status(500).send({
                                 message : "Invaild Server Error : upload image"
                             });
                         }
-                    location++;
+                    img_location++;
                     }
                 }
             }
@@ -121,10 +121,47 @@ router.post('/', upload.array('place_img') , async (req, res) => {
             });
 
         } else {
-            res.status(200).send({
-                message : "Successfully Insert Board and Place and Trans Data"
-            });
-        }
+            //계획서 장성 완료 됬으므로 전문가 + coin ,  신청자 - coin
+            let selectUserBudgetQuery = 'SELECT user_budget FROM user WHERE user_idx = (SELECT user_idx FROM board WHERE board_idx = ?)';
+            let selectUserBudget = await db.queryParam_Arr(selectUserBudgetQuery, [board_idx]);
+
+            let user_budget = selectUserBudget[0].user_budget;  //신청자 보유 코인
+
+            let selectExpertBudgetQuery = 'SELECT user_budget FROM user WHERE user_idx = ?';
+            let selectExpertBudget = await db.queryParam_Arr(selectExpertBudgetQuery, [expert_idx]);
+
+            let expert_budget = selectExpertBudget[0].user_budget;  //전문가 보유 코인
+
+            let selectCoinQuery = 'SELECT board_coin FROM board WHERE board_idx = ?';
+            let selectCoin = await db.queryParam_Arr(selectCoinQuery, [board_idx]);
+
+            let board_coin = selectCoin[0].board_coin;  //신청서에 할당된 코인
+
+            let new_budget = [user_budget - board_coin, expert_budget - board_coin];
+
+            if (new_budget[0] < 0) {
+                res.status(500).send({
+                    message : "Invaild Server Error : Low cost for users"
+                });
+            } else {
+                let updateUserBudgetQuery = 'UPDATE user SET user_budget = ? WHERE user_idx = (SELECT user_idx FROM board WHERE board_idx = ?)';
+                let updateUserBudget = await db.queryParam_Arr(updateUserBudgetQuery, [new_budget[0], board_idx]);
+
+                let updateExpertBudgetQuery = 'UPDATE user SET user_budget = ? WHERE user_idx = ?';
+                let updateExpertBudge = await db.queryParam_Arr(updateExpertBudgetQuery, [new_budget[1], expert_idx]);
+
+                if (!updateUserBudget || !updateExpertBudge) {
+                    res.status(500).send({
+                        message : "Invaild Server Error : Update user and expert budget"
+                    });
+                } else {
+                    res.status(200).send({
+                        message : "Successfully Insert Board and Place and Trans Data"
+                    });
+                }
+            }
+            
+        }        
     }
 });
 

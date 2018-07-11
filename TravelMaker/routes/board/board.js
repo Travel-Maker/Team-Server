@@ -57,7 +57,7 @@ router.post('/', async (req, res) => {
     let board_plan = req.body.board_plan;   //plan을 담은 배열
     let country_idx = req.body.country_idx; //나라 상세보기에서 했을 시
     let expert_idx = req.body.expert_idx   //전문가 페이지에서 작성했을시
-    let board_idx;
+    let board_idx = null;
 
     if (!user_idx || !board_title || !board_city || !board_dep_time || !board_arr_time || !board_plan || !country_idx) {
         res.status(400).send({

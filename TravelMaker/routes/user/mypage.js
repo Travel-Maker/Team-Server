@@ -77,7 +77,8 @@ router.put('/', async (req, res) => {
     }
 });
 
-router.put('/', async (req, res) => {
+//코멘트 달린 전문가 선택
+router.put('/select', async (req, res) => {
     let token = req.headers.token;
 	let decoded = jwt.verify(token);
 
@@ -85,13 +86,15 @@ router.put('/', async (req, res) => {
     let expert_idx = req.body.expert_idx;
     let board_idx = req.body.board_idx;
 
+    let expert_grade = 0;
+
     if (!expert_idx || !board_idx || !country_idx) {
-        res.status(500).send({
+        res.status(400).send({
             message : "Null Value"
         });
     } else {
-        let updateBoardQuery = 'UPDATE board SET expert_idx = ? WHERE user_idx = ? AND board_idx = ?';
-        let updateBoardResult = await db.queryParam_Arr(updateBoardQuery, [expert_idx, user_idx, board_idx]);
+        let updateBoardQuery = 'UPDATE board SET expert_idx = ? expert_grade = ? WHERE user_idx = ? AND board_idx = ?';
+        let updateBoardResult = await db.queryParam_Arr(updateBoardQuery, [expert_idx, expert_grade, user_idx, board_idx]);
 
         if (!updateBoardResult) {
             res.status(500).send({

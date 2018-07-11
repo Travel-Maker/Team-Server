@@ -26,6 +26,7 @@ router.post('/', upload.single('user_img'), async (req, res) => {
     
 
     let basic_coin = 500;
+    let no_expert = 0;
 
     console.log("id : " + user_id +  " // user_nick : " + user_nick);
 
@@ -55,8 +56,8 @@ router.post('/', upload.single('user_img'), async (req, res) => {
             });
         } else {
             //users table에 새로운 user 등록
-            let insertQuery = 'INSERT INTO user (user_id, user_name, user_age, user_gender, user_nick, user_email, user_style, user_img, user_budget) values ( ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-            let insertResult = await db.queryParam_Arr(insertQuery, [user_id, user_name, user_age, user_gender, user_nick, user_email, user_style, user_img, basic_coin]);
+            let insertQuery = 'INSERT INTO user (user_id, user_name, user_age, user_gender, user_nick, user_email, user_style, user_img, user_budget, user_expert, expert_rate) values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            let insertResult = await db.queryParam_Arr(insertQuery, [user_id, user_name, user_age, user_gender, user_nick, user_email, user_style, user_img, basic_coin, no_expert, no_expert]);
        
             if (!insertResult) {
                 console.log("DB Insert Error");
