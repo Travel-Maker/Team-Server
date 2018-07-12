@@ -14,23 +14,34 @@ router.get('/:country_idx', async (req, res) => {
             message : "Null Value : country_idx"
         });
     } else {
-        let selectBoardQuery = 'SELECT b.board_idx, b.board_title, count(*) as comment_count FROM board as b LEFT JOIN comment as c ON b.board_idx = c.board_idx WHERE b.country_idx = ? GROUP BY b.board_title ORDER BY b.board_idx DESC'
+        let selectBoardQuery = 'SELECT board_idx, board_title, user_idx FROM board WHERE country_idx = ? ORDER BY board_idx DESC'
         let selectBoardResult = await db.queryParam_Arr(selectBoardQuery, [country_idx]);
 
-        let selectUserInfoQuery = 'SELECT * FROM user as u WHERE u.user_idx in (SELECT user_idx FROM board WHERE country_idx = ?)';
-        let selectUserInfoResult = await db.queryParam_Arr(selectUserInfoQuery, [country_idx]);
 
-
-        if (!selectBoardResult || !selectUserInfoResult) {
+        if (!selectBoardResult) {
             res.status(500).send({
                 message : "Internal Server Error : Select Board"
             });
         } else {
+            for (var i = 0; i < selectBoardResult.length; i++) {
+                let countCommentQuery = 'SELECT count(*) comment_count FROM comment WHERE board_idx = ?';
+                let countCommentResult = await db.queryParam_Arr(countCommentQuery, [selectBoardResult[i].board_idx]);
+
+                let selectUserNickQuery = 'SELECT user_nick FROM user WHERE user_idx = ?'
+                let selectUserNickResult = await db.queryParam_Arr(selectUserNickQuery, [selectBoardResult[i].user_idx]);
+
+                if (!countCommentResult || !selectUserNickResult) {
+                    res.status(500).send({
+                        message : "Invaild Server Error : select nickname and comment count"
+                    });
+                } else {
+                    selectBoardResult[i].comment_count = countCommentResult[0].comment_count;
+                    selectBoardResult[i].user_nick = selectUserNickResult[0].user_nick;
+                }
+            }
             res.status(200).send({
-                message : "Successfully Get Board",
-                boardData : selectBoardResult,
-                user_in_board_data : selectUserInfoResult,
-                country_idx : country_idx
+                message : "Succeddfully Get Board Data",
+                board_data : selectBoardResult
             });
         }
     }
@@ -59,6 +70,11 @@ router.post('/', async (req, res) => {
     let expert_idx = req.body.expert_idx   //전문가 페이지에서 작성했을시
     let board_idx = null;
 
+    console.log(req.body);
+    console.log(board_plan);
+    console.log(board_plan[0].inn);
+    console.log(board_plan[0].acc);
+    console.log(board_plan[0].out);
     if (!user_idx || !board_title || !board_city || !board_dep_time || !board_arr_time || !board_plan || !country_idx) {
         res.status(400).send({
             message : "Null Value"
@@ -76,8 +92,8 @@ router.post('/', async (req, res) => {
         }
         
         //국가 페이지에서 작성했을 때
-        let createBoardQuery = 'INSERT INTO board (country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_coin, board_writetime) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        let createBoardResult =  await db.queryParam_Arr(createBoardQuery, [country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_coin, board_writetime]);
+        let createBoardQuery = 'INSERT INTO board (country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_days, board_coin, board_writetime) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        let createBoardResult =  await db.queryParam_Arr(createBoardQuery, [country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_days, board_coin, board_writetime]);
     
         if (!createBoardResult) {
             res.status(500).send({
@@ -87,8 +103,9 @@ router.post('/', async (req, res) => {
             board_idx = createBoardResult.insertId;
 
             console.log("board_idx : " + board_idx);
+            console.log(board_plan);
 
-            let plan_in = board_plan[0].in;
+            let plan_in = board_plan[0].inn;
             let acommondations = board_plan[0].acc;
             let plan_out = board_plan[0].out;
 
@@ -103,12 +120,13 @@ router.post('/', async (req, res) => {
                     });
                 }
             }
+
+            res.status(200).send({
+                message : "Successfully Create Board Data",
+                board_idx : board_idx
+            });    
         }
-        res.status(200).send({
-            message : "Successfully Create Board Data",
-            board_idx : board_idx
-        });
-    
+       
     }
 });
 
@@ -154,7 +172,7 @@ router.put('/', async (req, res) => {
             for (var i = 0; i < plan_in.length; i++) {
                 let plan_count = i + 1;
                 let insertPlanQuery = 'UPDATE plan SET plan_in = ?, plan_in_date = ?, plan_acc_name = ?, plan_out = ?, plan_out_date = ? WHERE plan_count = ? AND board_idx = ?';
-                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [plan_in[i].plan_in, plan_in[i].plan_in_date, acommondations[i], plan_out[i].plan_out, plan_out[i].plan_out_date, plan_count, board_idx]);
+                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [plan_in[i].plan_in, plan_in[i].plan_in_date, acommondations[i].name, plan_out[i].plan_out, plan_out[i].plan_out_date, plan_count, board_idx]);
 
                 if (!insertPlanResult) {
                     res.status(500).send({

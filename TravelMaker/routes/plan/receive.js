@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
 
     console.log("expert_idx : " + user_idx);
     
-    let selectPlanQuery = 'SELECT board_idx, board_title FROM board WHERE expert_idx = ? ORDER BY board_idx DESC';
+    let selectPlanQuery = 'SELECT board_idx, board_title, board_status FROM board WHERE expert_idx = ? ORDER BY board_idx DESC';
     let selectPlanResult = await db.queryParam_Arr(selectPlanQuery, [user_idx]);
 
     let receiveBoards = new Array();

@@ -75,7 +75,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
             }
 
             //해당 장소에 이미지 넣기 
-            if (req.files != undefined || !req.files.length) {
+            if ((req.files != undefined) || (req.files.length === 0)) {
                 for (var j = 0; j < place.length; j++) {
                     let place_count = j + 1;
                     if (place[j].image == 1) {

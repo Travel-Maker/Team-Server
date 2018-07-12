@@ -21,8 +21,21 @@ router.get('/:board_idx', async (req, res) => {
         let selectPlanQuery = 'SELECT * FROM plan WHERE board_idx = ?';
         let selectPlanResult = await db.queryParam_Arr(selectPlanQuery, [board_idx]);
 
-        let selectCommentQuery = 'SELECT * FROM comment WHERE board_idx = ?';
+        let selectCommentQuery = 'SELECT * FROM comment WHERE board_idx = ? ORDER BY comment_idx DESC';
         let selectCommentResult = await db.queryParam_Arr(selectCommentQuery, [board_idx]);
+
+        let comments = new Array();
+
+        for (var i = 0; i < selectCommentResult.length; i++) {
+            let selectUserNickQuery = 'SELECT user_nick FROM user WHERE user_idx = (SELECT user_idx FROM comment WHERE comment_idx = ?)';
+            let selectUserNickResult = await db.queryParam_Arr(selectUserNickQuery, [selectCommentResult[i].comment_idx]);
+
+            let comment = {
+                "user_nick" : selectUserNickResult[0].user_nick,
+                "comment_data" : selectCommentResult[i]
+            }
+            comments[i] = comment;
+        }
 
         if (!selectBoardResult || !selectPlanResult || !selectCommentResult) {
             res.status(500).send({
@@ -34,7 +47,7 @@ router.get('/:board_idx', async (req, res) => {
                 sender : selectUserNickResult,
                 board : selectBoardResult,
                 plan : selectPlanResult,
-                comment : selectCommentResult
+                comment : comments
             });
         }
     }

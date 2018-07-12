@@ -11,7 +11,7 @@ router.post('/', async (req, res) => {
 
     let user_idx = decoded.user_idx;
 
-    let selectPlanQuery = 'SELECT board_title, board_status FROM board WHERE user_idx = ? ORDER BY board_idx DESC';
+    let selectPlanQuery = 'SELECT board_idx, board_title, board_status, expert_idx FROM board WHERE user_idx = ? ORDER BY board_idx DESC';
     let selectPlanResult = await db.queryParam_Arr(selectPlanQuery, [user_idx]);
 
     if (!selectPlanResult) {

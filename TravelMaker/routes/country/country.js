@@ -5,6 +5,7 @@ const db = require('../../module/pool.js');
 
 router.get('/:country_idx', async (req, res) => {
     let country_idx = req.params.country_idx;
+    console.log("country index : " + country_idx);
 
     if (!country_idx) {
         res.status(400).send({
@@ -27,9 +28,19 @@ router.get('/:country_idx', async (req, res) => {
             let getExpertResult = await db.queryParam_Arr(getExpertQuery, [country_name + "%", country_name + "%", country_name + "%"]);
            // console.log(getExpertResult);
 
-           let getBoardQuery = 'SELECT b.board_idx, b.board_title, count(*) as comment_count FROM board as b LEFT JOIN comment as c ON b.board_idx = c.board_idx WHERE b.country_idx = ? GROUP BY b.board_title ORDER BY b.board_idx DESC'
+           let getBoardQuery = 'SELECT board_idx, board_title FROM board WHERE country_idx = ? ORDER BY board_idx DESC'
            let getBoardResult = await db.queryParam_Arr(getBoardQuery, [country_idx]);
             //console.log(getBoardResult);
+
+            let board_data = new Array();
+
+            for (var i = 0; i < getBoardResult.length; i++) {
+                
+                let getBoardCommentQuery = 'SELECT count(*) comment_count FROM comment WHERE board_idx = ?';
+                let getBoardComment = await db.queryParam_Arr(getBoardCommentQuery, [getBoardResult[i].board_idx])
+
+                getBoardResult[i].comment_count = getBoardComment[0].comment_count;
+            }
 
             res.status(200).send({
                 message : "Seccessfully Get Country Data",
