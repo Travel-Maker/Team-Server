@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
 		});
 	} else { 
 		if (selectBookmarkResult.length == 1) {	//북마크 이미 존재
-			let deleteBookmarkQuery = 'DELETE FROM bookmark_expert WHERE expert_idx = ? AND user_idx = ?;';
+			let deleteBookmarkQuery = 'DELETE FROM bookmark_expert WHERE expert_idx = ? AND user_idx = ?';
 			let deleteBookmarkResult = await db.queryParam_Arr(deleteBookmarkQuery, [expert_idx, user_idx]);
 
 			if (!deleteBookmarkResult) {

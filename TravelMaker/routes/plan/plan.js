@@ -22,12 +22,9 @@ router.post('/', upload.array('place_img') , async (req, res) => {
     let board_idx = parseInt(req.body.board_idx);
     let plan = JSON.parse(req.body.plan);
 
-    console.log(req.body);
-    console.log(plan);
-
     // console.log(req.body);
     // console.log("-------------body 안의 plan");
-    // console.log(plan);
+    console.log(plan);
 
     let totalBudget = 0;
     let img_location = 0;
@@ -35,16 +32,16 @@ router.post('/', upload.array('place_img') , async (req, res) => {
     if (!board_idx || !plan) {
         res.status(400).send({
             message : "Null Value : idx or plan data"
-        });
+        }).end();
     } else {
         for (var i = 0; i < plan.length; i++) {
             let place = plan[i].place;     //n day에 갈 장소들
             let trans = plan[i].trans;     //n day에 이용할 교통수단
 
             // console.log("\n-------------day" + i + " place list");
-            // console.log(place);
+            //console.log(place);
             // console.log("\n-------------day" + i + " trans list");
-            // console.log(trans);
+            //console.log(trans);
 
             let place_day = i + 1;
 
@@ -57,10 +54,11 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                 if (!place[j].place_latitude || !place[j].place_longitude) {
                     res.status(400).send({
                         message : "Null Value : longtitude and latitude"
-                    });
+                    }).end();
                 } else {
-                    let insertPlaceQuery = 'INSERT INTO place VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                    let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_budget_comment, null, board_idx]);
+                    //console.log(place_day + "--" + place_count + "--" + place[j].place_name + "--" + place[j].place_comment + "--" + place[j].place_latitude + "--" + place[j].place_longitude + "--" + place[j].place_budget + "--" + place[j].place_budget_comment + "--" + board_idx)
+                    let insertPlaceQuery = 'INSERT INTO place (place_day, place_count, place_name, place_comment, place_latitude, place_longitude, place_budget, place_budget_comment, board_idx) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                    let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_budget_comment, board_idx]);
 
                     if (place[j].place_budget) {
                         totalBudget += parseInt(place[j].place_budget);
@@ -69,7 +67,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                     if (!insertPlaceResult) {
                         res.status(500).send({
                             messgae : "Internal Server Error : insert place"
-                        });
+                        }).end();      
                     } 
                 }
             }
@@ -85,7 +83,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                         if (!updateImageResult) {
                             res.status(500).send({
                                 message : "Invaild Server Error : upload image"
-                            });
+                            }).end();
                         }
                     img_location++;
                     }
@@ -97,7 +95,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                 if (!trans[j].trans_dep_time || !trans[j].trans_arr_time) {
                     res.status(500).send({
                         message : "Null Value : longtitude and latitude"
-                    });
+                    }).end();
                 } else {
                     let insertTransQuery = 'INSERT INTO transportation VALUES (null, ?, ?, ?, ?, ?, ?, ?)';
                     let insertTransResult = await db.queryParam_Arr(insertTransQuery, [trans[j].trans_name, trans[j].trans_budget, place_day, trans[j].trans_dep_time, trans[j].trans_arr_time, trans[j].trans_content, board_idx]);
@@ -109,7 +107,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                     if (!insertTransResult) {
                         res.status(500).send({
                             messgae : "Internal Server Error : insert transpostation"
-                        });
+                        }).end();
                     } 
                 }
             }
@@ -121,8 +119,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
         if (!setBoardBudgetResult) {
             res.status(500).send({
                 message : "Internal Server Error : update board budget"
-            });
-
+            }).end();
         } else {
             //계획서 장성 완료 됬으므로 전문가 + coin ,  신청자 - coin
             let selectUserBudgetQuery = 'SELECT user_budget FROM user WHERE user_idx = (SELECT user_idx FROM board WHERE board_idx = ?)';
@@ -145,7 +142,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
             if (new_budget[0] < 0) {
                 res.status(500).send({
                     message : "Invaild Server Error : Low cost for users"
-                });
+                }).end();
             } else {
                 let updateUserBudgetQuery = 'UPDATE user SET user_budget = ? WHERE user_idx = (SELECT user_idx FROM board WHERE board_idx = ?)';
                 let updateUserBudget = await db.queryParam_Arr(updateUserBudgetQuery, [new_budget[0], board_idx]);
@@ -156,7 +153,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                 if (!updateUserBudget || !updateExpertBudge) {
                     res.status(500).send({
                         message : "Invaild Server Error : Update user and expert budget"
-                    });
+                    }).end();
                 } else {
                     res.status(200).send({
                         message : "Successfully Insert Board and Place and Trans Data"

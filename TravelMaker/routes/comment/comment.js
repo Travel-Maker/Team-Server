@@ -122,4 +122,38 @@ router.delete('/', async (req, res)=>{
 	
 });
 
+//코멘트 선택 : 신청서 보낼 전문가 선택
+router.put('/select', async (req, res) => {
+    let board_idx = req.body
+    let comment_idx = req.body.comment_idx;
+
+    let selectExpertQuery = 'SELECT user_idx FROM user WHERE user_idx = (SELECT user_idx FROM comment WHERE comment_idx = ?)';
+    let selectExpertResult = await db.queryParam_Arr(selectExpertQuery, [comment_idx]);
+
+    if (!selectExpertResult) {
+        res.status(500).send({
+            message : "Invaild Server Error : get expert index error"
+        });
+    } else {
+        let exper_idx = selectExpertResult[0].user_idx;
+
+        let updateBoardQuery = 'UPDATE board SET expert_idx = ? WHERE board_idx = (SELECT board_idx FROM comment WHERE comment_idx = ?)';
+        let updateBoardResult = await db.queryParam_Arr(updateBoardQuery, [exper_idx, comment_idx]);
+
+        if (!updateBoardResult) {
+            res.status(500).send({
+                message : "Invaild Server Error : update board date error"
+            });
+        } else {
+            res.status(200).send({
+                message : "Successfully Update Board Data"
+            });
+        }
+    }
+
+    
+
+    
+});
+
 module.exports = router;

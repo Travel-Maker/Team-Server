@@ -95,7 +95,7 @@ router.post('/', async (req, res) => {
         //국가 페이지에서 작성했을 때
         let createBoardQuery = 'INSERT INTO board (country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_days, board_coin, board_writetime) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         let createBoardResult =  await db.queryParam_Arr(createBoardQuery, [country_idx, user_idx, expert_idx, board_title, board_city, board_dep_time, board_arr_time, board_content, board_status, board_days, board_coin, board_writetime]);
-    
+        
         if (!createBoardResult) {
             res.status(500).send({
                 message : "Internal Server Error : insert board error"
@@ -113,13 +113,15 @@ router.post('/', async (req, res) => {
             let flag = 0;
             //console.log("---------------" + plan_in.length);
             for (var i = 0; i < plan_in.length; i++) {
-
+                //console.log(plan_in[i].plan_in + "-----" + plan_in[i].plan_in_date);
                 let plan_count = i + 1;
                 let insertPlanQuery = 'INSERT INTO plan (country_idx, plan_count, plan_in, plan_in_date, plan_acc_name, plan_out, plan_out_date, board_idx) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)';
-                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [country_idx, plan_count, plan_in[i].plan_in, plan_in[i].plan_in_date, acommondations[i], plan_out[i].plan_out, plan_out[i].plan_out_date, board_idx]);
-                console.log(insertPlanResult);
+                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [country_idx, plan_count, plan_in[i].plan_in, plan_in[i].plan_in_date, acommondations[i].name, plan_out[i].plan_out, plan_out[i].plan_out_date, board_idx]);
+                //console.log(country_idx + "--" + plan_count + "--" + plan_in[i].plan_in + "--" + plan_in[i].plan_in_date + "--" + acommondations[i].name + "--" + plan_out[i].plan_out + "--" + plan_out[i].plan_out_date + "--" + board_idx);
+                //console.log(insertPlanResult);
                 
                 if (!insertPlanResult) {
+                    console.log("here");
                     flag = 1;
                     break;
                 }
@@ -128,6 +130,7 @@ router.post('/', async (req, res) => {
             if (flag == 1) {
                 let deleteBoardQuery = 'DELETE FROM board WHERE board_idx = ?';
                 let deleteBoardResult = await db.queryParam_Arr(deleteBoardQuery, [board_idx]);
+
                 res.status(500).send({
                     message : "Invalild Server Error : insert plan"
                 });

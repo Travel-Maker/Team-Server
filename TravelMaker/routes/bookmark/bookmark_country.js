@@ -14,6 +14,7 @@ router.post('/', async (req, res) => {
 	
 	let selectBookmarkQuery = 'SELECT * FROM bookmark_country WHERE country_idx = ? AND user_idx = ?;';
 	let selectBookmarkResult = await db.queryParam_Arr(selectBookmarkQuery, [country_idx, user_idx]);
+	console.log(selectBookmarkResult.length);
 
 	if (!country_idx || !user_idx) { 
 		res.status(400).send({
@@ -21,7 +22,7 @@ router.post('/', async (req, res) => {
 		});
 	} else { 
 		if (selectBookmarkResult.length == 1) {	//북마크 이미 존재
-			let deleteBookmarkQuery = 'bookmark_expert';
+			let deleteBookmarkQuery = 'DELETE FROM bookmark_country WHERE country_idx = ? AND user_idx = ?;';
 			let deleteBookmarkResult = await db.queryParam_Arr(deleteBookmarkQuery, [country_idx, user_idx]);
 
 			if (!deleteBookmarkResult) {

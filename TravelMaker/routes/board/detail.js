@@ -31,7 +31,7 @@ router.get('/:board_idx', async (req, res) => {
             let selectUserNickResult = await db.queryParam_Arr(selectUserNickQuery, [selectCommentResult[i].comment_idx]);
 
             let comment = {
-                "user_nick" : selectUserNickResult[0].user_nick,
+                "user_info" : selectUserNickResult[0].user_nick,
                 "comment_data" : selectCommentResult[i]
             }
             comments[i] = comment;
