@@ -146,7 +146,7 @@ router.put('/', async (req, res) => {
 
 router.delete('/', async (req, res) => {
     //게시글 상태 : 거절(3)
-    //게시글 ㅋ전문가 인덱스 없애기
+    //게시글 전문가 인덱스 없애기
     let token = req.headers.token;
 	let decoded = jwt.verify(token);
 

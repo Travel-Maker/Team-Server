@@ -22,8 +22,8 @@ router.post('/', upload.array('place_img') , async (req, res) => {
     let board_idx = parseInt(req.body.board_idx);
     let plan = JSON.parse(req.body.plan);
 
-    console.log(req.files);
-    console.log(req.files.length);
+    console.log(req.body);
+    console.log(plan);
 
     // console.log(req.body);
     // console.log("-------------body 안의 plan");

@@ -75,6 +75,7 @@ router.post('/', async (req, res) => {
     console.log(board_plan[0].inn);
     console.log(board_plan[0].acc);
     console.log(board_plan[0].out);
+
     if (!user_idx || !board_title || !board_city || !board_dep_time || !board_arr_time || !board_plan || !country_idx) {
         res.status(400).send({
             message : "Null Value"
@@ -100,7 +101,7 @@ router.post('/', async (req, res) => {
                 message : "Internal Server Error : insert board error"
             });
         } else {
-            board_idx = createBoardResult.insertId;
+            board_idx = parseInt(createBoardResult.insertId);
 
             console.log("board_idx : " + board_idx);
             console.log(board_plan);
@@ -109,22 +110,34 @@ router.post('/', async (req, res) => {
             let acommondations = board_plan[0].acc;
             let plan_out = board_plan[0].out;
 
+            let flag = 0;
+            //console.log("---------------" + plan_in.length);
             for (var i = 0; i < plan_in.length; i++) {
-                let plan_count = i + 1;
-                let insertPlanQuery = 'INSERT INTO plan VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?)';
-                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [country_idx, plan_count, plan_in[i].plan_in, plan_in[i].plan_in_date, acommondations[i], plan_out[i].plan_out, plan_out[i].plan_out_date, board_idx]);
 
+                let plan_count = i + 1;
+                let insertPlanQuery = 'INSERT INTO plan (country_idx, plan_count, plan_in, plan_in_date, plan_acc_name, plan_out, plan_out_date, board_idx) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)';
+                let insertPlanResult = await db.queryParam_Arr(insertPlanQuery, [country_idx, plan_count, plan_in[i].plan_in, plan_in[i].plan_in_date, acommondations[i], plan_out[i].plan_out, plan_out[i].plan_out_date, board_idx]);
+                console.log(insertPlanResult);
+                
                 if (!insertPlanResult) {
-                    res.status(500).send({
-                        message : "Invalild Server Error : insert plan"
-                    });
+                    flag = 1;
+                    break;
                 }
             }
 
-            res.status(200).send({
-                message : "Successfully Create Board Data",
-                board_idx : board_idx
-            });    
+            if (flag == 1) {
+                let deleteBoardQuery = 'DELETE FROM board WHERE board_idx = ?';
+                let deleteBoardResult = await db.queryParam_Arr(deleteBoardQuery, [board_idx]);
+                res.status(500).send({
+                    message : "Invalild Server Error : insert plan"
+                });
+            } else {
+                res.status(200).send({
+                    message : "Successfully Create Board Data",
+                    board_idx : board_idx
+                }); 
+            }
+               
         }
        
     }
