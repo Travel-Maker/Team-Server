@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+router.use('/test', require('./test.js'));
+
 //계획서 작성 밑 수정
 const plan = require('./plan.js');
 router.use('/', plan);
@@ -16,6 +18,8 @@ router.use('/view', view);
 //보낸 신청서 관리
 const send = require('./send.js');
 router.use('/send', send);
+
+
 
 
 module.exports = router;
