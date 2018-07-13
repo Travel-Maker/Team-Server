@@ -89,9 +89,9 @@ router.put('/', async (req, res) => {
 	let decoded = jwt.verify(token);
 
     let expert_idx = decoded.user_idx;    //전문가의 인덱스가 들어옴
-    let user_idx = req.body.user_idx    //board안의 user_idx
+    let user_idx = parseInt(req.body.user_idx);    //board안의 user_idx
     let board_idx = req.body.board_idx;
-    let board_budget = req.body.board_budget;
+    let board_coin = req.body.board_coin;
 
     let board_status = 2;
 
@@ -100,20 +100,22 @@ router.put('/', async (req, res) => {
             message : "Null Value"
         });
     } else {
-        let idxs = [user_idx, expert_idx];
+        var idxs = [user_idx, expert_idx];
+        console.log(idxs);
 
         //잔고 바꾸기
         for (var i = 0; i < 2; i++) {
             let getBudgetQuery = 'SELECT user_budget FROM user WHERE user_idx = ?';
             let getBudget = await db.queryParam_Arr(getBudgetQuery, [idxs[i]]);
+            console.log(getBudget);
 
-            let budget = getBudget[0].user_budget;
+            var budget = parseInt(getBudget[0].user_budget);
 
             if (i == 0) {
-                budget -= board_budget;
+                budget = budget - parseInt(board_coin);
                 console.log("유저의 잔고 : " + budget);
             } else {
-                budget += parseInt(board_budget);
+                budget = budget + parseInt(board_coin);
                 console.log("전문가의 잔고 : " + budget);
             }
 

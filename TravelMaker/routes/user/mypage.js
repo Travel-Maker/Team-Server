@@ -62,7 +62,7 @@ router.put('/', async (req, res) => {
             }
         }
 
-        let changeToExpertQuery = 'UPDATE user SET user_expert = 1 WHERE user_idx = ?';
+        let changeToExpertQuery = 'UPDATE user SET user_expert = 1 expert_grade = 0 WHERE user_idx = ?';
         let changeToExpertResult = await db.queryParam_Arr(changeToExpertQuery, [user_idx]);
         
         if (!changeToExpertResult) {

@@ -28,6 +28,7 @@ router.post('/', upload.array('place_img') , async (req, res) => {
 
     let totalBudget = 0;
     let img_location = 0;
+    let board_status = 4;
 
     if (!board_idx || !plan) {
         res.status(400).send({
@@ -38,18 +39,21 @@ router.post('/', upload.array('place_img') , async (req, res) => {
             let place = plan[i].place;     //n day에 갈 장소들
             let trans = plan[i].trans;     //n day에 이용할 교통수단
 
+            
+
             // console.log("\n-------------day" + i + " place list");
             //console.log(place);
             // console.log("\n-------------day" + i + " trans list");
             //console.log(trans);
 
             let place_day = i + 1;
+            //console.log("place length : " + place.length);
 
             //전체 place 관광지 입력
             for (var j = 0; j < place.length; j++) {
                 let place_count = j + 1;
 
-                //console.log(place[j]);
+                console.log(i + "---" + j);
 
                 if (!place[j].place_latitude || !place[j].place_longitude) {
                     res.status(400).send({
@@ -58,59 +62,72 @@ router.post('/', upload.array('place_img') , async (req, res) => {
                 } else {
                     //console.log(place_day + "--" + place_count + "--" + place[j].place_name + "--" + place[j].place_comment + "--" + place[j].place_latitude + "--" + place[j].place_longitude + "--" + place[j].place_budget + "--" + place[j].place_budget_comment + "--" + board_idx)
                     let insertPlaceQuery = 'INSERT INTO place (place_day, place_count, place_name, place_comment, place_latitude, place_longitude, place_budget, place_budget_comment, board_idx) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                    let insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_budget_comment, board_idx]);
+                    var insertPlaceResult = await db.queryParam_Arr(insertPlaceQuery, [place_day, place_count, place[j].place_name, place[j].place_comment, place[j].place_latitude, place[j].place_longitude, place[j].place_budget, place[j].place_budget_comment, board_idx]);
 
                     if (place[j].place_budget) {
                         totalBudget += parseInt(place[j].place_budget);
                     }
 
                     if (!insertPlaceResult) {
-                        res.status(500).send({
-                            messgae : "Internal Server Error : insert place"
-                        }).end();      
+                        console.log("error : " + i + "---" + j);
+                        break;     
                     } 
                 }
             }
 
-            //해당 장소에 이미지 넣기 
-            if ((req.files != undefined) || (req.files.length === 0)) {
-                for (var j = 0; j < place.length; j++) {
-                    let place_count = j + 1;
-                    if (place[j].image == 1) {
-                        let updateImageQuery = 'UPDATE place SET place_img = ? WHERE board_idx = ? AND place_day = ? AND place_count = ?';
-                        let updateImageResult = await db.queryParam_Arr(updateImageQuery, [req.files[img_location].location, board_idx, place_day, place_count]);
+            if (insertPlaceResult == undefined) {
+                res.status(500).send({
+                    messgae : "Internal Server Error : insert place"
+                });
+            } else {
+                //해당 장소에 이미지 넣기 
+                if ((req.files != undefined) || (req.files.length === 0)) {
+                    for (var j = 0; j < place.length; j++) {
+                        let place_count = j + 1;
+                        if (place[j].image == 1) {
+                            let updateImageQuery = 'UPDATE place SET place_img = ? WHERE board_idx = ? AND place_day = ? AND place_count = ?';
+                            var updateImageResult = await db.queryParam_Arr(updateImageQuery, [req.files[img_location].location, board_idx, place_day, place_count]);
 
-                        if (!updateImageResult) {
-                            res.status(500).send({
-                                message : "Invaild Server Error : upload image"
-                            }).end();
+                            if (!updateImageResult) {
+                                break;
+                            }
+                        img_location++;
                         }
-                    img_location++;
-                    }
-                }
-            }
-
-            //전체 trans 입력
-            for (var j = 0; j < trans.length; j++) {
-                if (!trans[j].trans_dep_time || !trans[j].trans_arr_time) {
-                    res.status(500).send({
-                        message : "Null Value : longtitude and latitude"
-                    }).end();
-                } else {
-                    let insertTransQuery = 'INSERT INTO transportation VALUES (null, ?, ?, ?, ?, ?, ?, ?)';
-                    let insertTransResult = await db.queryParam_Arr(insertTransQuery, [trans[j].trans_name, trans[j].trans_budget, place_day, trans[j].trans_dep_time, trans[j].trans_arr_time, trans[j].trans_content, board_idx]);
-                
-                    if (trans[j].trans_budget) {
-                        totalBudget += parseInt(trans[j].trans_budget);
                     }
 
-                    if (!insertTransResult) {
+                    if (updateImageResult == undefined) {
                         res.status(500).send({
-                            messgae : "Internal Server Error : insert transpostation"
-                        }).end();
-                    } 
-                }
-            }
+                            message : "Invaild Server Error : upload image"
+                        });
+                    } else {
+                        //전체 trans 입력
+                        for (var j = 0; j < trans.length; j++) {
+                            if (!trans[j].trans_dep_time || !trans[j].trans_arr_time) {
+                                res.status(500).send({
+                                    message : "Null Value : longtitude and latitude"
+                                }).end();
+                            } else {
+                                let insertTransQuery = 'INSERT INTO transportation VALUES (null, ?, ?, ?, ?, ?, ?, ?)';
+                                var insertTransResult = await db.queryParam_Arr(insertTransQuery, [trans[j].trans_name, trans[j].trans_budget, place_day, trans[j].trans_dep_time, trans[j].trans_arr_time, trans[j].trans_content, board_idx]);
+                            
+                                if (trans[j].trans_budget) {
+                                    totalBudget += parseInt(trans[j].trans_budget);
+                                }
+
+                                if (!insertTransResult) {
+                                    break;
+                                } 
+                            }
+                        }
+
+                        if (insertTransResult == undefined) {
+                            res.status(500).send({
+                                messgae : "Internal Server Error : insert transpostation"
+                            });
+                        }
+                    }
+                }    
+            }  
         } 
 
         let setBoardBudgetQuery = 'UPDATE board SET board_budget = ? WHERE board_idx = ?';
@@ -140,6 +157,12 @@ router.post('/', upload.array('place_img') , async (req, res) => {
             let new_budget = [user_budget - board_coin, expert_budget - board_coin];
 
             if (new_budget[0] < 0) {
+                let deletePlanQuery = 'DELETE FROM place WHERE board_idx = ?';
+                let deleteTransQuery = 'DELETE FROM transportation WHERE board_idx = ?';
+
+                let deletePlanResult = await db.queryParam_Arr(deletePlanQuery, [board_idx]);
+                let deleteTransResult = await db.queryParam_Arr(deleteTransQuery, [board_idx]);
+
                 res.status(500).send({
                     message : "Invaild Server Error : Low cost for users"
                 }).end();
@@ -149,6 +172,9 @@ router.post('/', upload.array('place_img') , async (req, res) => {
 
                 let updateExpertBudgetQuery = 'UPDATE user SET user_budget = ? WHERE user_idx = ?';
                 let updateExpertBudge = await db.queryParam_Arr(updateExpertBudgetQuery, [new_budget[1], expert_idx]);
+
+                let updateStatusQuery = 'UPDATE board SET board_status = ? WHERE board_idx = ?';
+                let updateStatusResult = await db.queryParam_Arr(updateStatusQuery, [board_status, board_idx]);
 
                 if (!updateUserBudget || !updateExpertBudge) {
                     res.status(500).send({

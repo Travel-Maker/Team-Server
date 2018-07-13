@@ -17,7 +17,7 @@ router.post('/', upload.single('user_img'), async (req, res) => {
     let user_gender = req.body.user_gender;
     let user_nick = req.body.user_nick;
     let user_email = req.body.user_email;
-    let user_style = parseInt(req.body.user_style);
+    let user_style = req.body.user_style;
     let user_img = null;
 
     if (req.file != undefined) {
@@ -41,6 +41,7 @@ router.post('/', upload.single('user_img'), async (req, res) => {
             message : "Null Value"
         })
     } else {
+        user_style = parseInt(req.body.user_style);
         //입력받은 user_nick가 원래 있는지 검사
         let checkNickQuery = 'SELECT * FROM user WHERE user_nick = ?';
         let checkNickResult = await db.queryParam_Arr(checkNickQuery, [user_nick]);
