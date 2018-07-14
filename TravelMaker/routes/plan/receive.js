@@ -50,7 +50,7 @@ router.post('/', async (req, res) => {
 
         res.status(200).send({
             message : "Successful Get Board Data",
-            receive_board : board_array //원본 -> receive_board : receiveBoards
+            receive_board : receiveBoards
         });
         
     }
