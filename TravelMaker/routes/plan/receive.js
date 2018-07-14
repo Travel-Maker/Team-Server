@@ -16,6 +16,9 @@ router.post('/', async (req, res) => {
     let selectPlanQuery = 'SELECT board_idx, board_title, board_status FROM board WHERE expert_idx = ? ORDER BY board_idx DESC';
     let selectPlanResult = await db.queryParam_Arr(selectPlanQuery, [user_idx]);
 
+    console.log("----------");
+    console.log(selectPlanResult);
+
     let receiveBoards = new Array();
 
     if (!selectPlanResult) {
@@ -40,9 +43,14 @@ router.post('/', async (req, res) => {
                 receiveBoards[i] = board;  
             } 
         }
+        let board_array = new Array();
+        board_array[0] = receiveBoards[0];
+        console.log("===========");
+        console.log(receiveBoards[0]);
+
         res.status(200).send({
             message : "Successful Get Board Data",
-            receive_board : receiveBoards
+            receive_board : board_array //원본 -> receive_board : receiveBoards
         });
         
     }

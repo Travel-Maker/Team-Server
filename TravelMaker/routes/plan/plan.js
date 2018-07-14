@@ -11,8 +11,6 @@ const s3 = new aws.S3();
 aws.config.loadFromPath('./config/aws_config.json');
 const upload = require('../../config/multer.js');
 
- 
-
 //계획서 작성 : 완료
 router.post('/', upload.array('place_img'), async (req, res, next) => {
     let token = req.headers.token;

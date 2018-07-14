@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-router.use('/test', require('./test.js'));
-
 //계획서 작성 밑 수정
 const plan = require('./plan.js');
 router.use('/', plan);
