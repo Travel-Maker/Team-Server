@@ -47,9 +47,9 @@
 	"multer": "^1.3.1",
 	"multer-s3": "^2.7.0",
 	"promise-mysql": "^3.3.1"
-  }}```
-
-
+}} 
+​```
+```
 
 ## 시작하기
 
@@ -93,6 +93,3 @@
 
 * [Android](https://github.com/Travel-Maker/Team-Android)
 * [iOS](https://github.com/Travel-Maker/Team-iOS)
-
-
-```
