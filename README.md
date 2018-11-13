@@ -2,7 +2,7 @@
 
 * 2018 SOPT 22기 APPJAM Project
 
-![mainImage](C:\Users\hj977\Documents\Travel_Maker\ReadMe.jpg)
+![mainImage](https://drive.google.com/open?id=10yJiNdyOzKrrxff9ypI6FsFlui6Ko31K)
 
 
 
@@ -24,44 +24,30 @@
 
   * ERD
 
-  ![ERD](C:\Users\hj977\Documents\Travel_Maker\트래블메이커_ERD.jpg)
+  ![ERD](https://drive.google.com/open?id=154ObISmK5Iitv2owfkWvBIYlEjIogm_a)
 
 
 
 
 ## 의존성
 
+```json
 "dependencies": {
-
-​    "async": "^2.6.1",
-
-​    "aws-sdk": "^2.269.1",
-
-​    "cookie-parser": "^1.4.3",
-
-​    "debug": "^2.6.9",
-
-​    "express": "^4.16.3",
-
-​    "helmet": "^3.12.1",
-
-​    "http-errors": "^1.6.3",
-
-​    "jade": "^1.11.0",
-
-​    "jsonwebtoken": "^8.3.0",
-
-​    "moment": "^2.22.2",
-
-​    "morgan": "^1.9.0",
-
-​    "multer": "^1.3.1",
-
-​    "multer-s3": "^2.7.0",
-
-​    "promise-mysql": "^3.3.1"
-
-  }}`
+	"async": "^2.6.1",
+	"aws-sdk": "^2.269.1",
+	"cookie-parser": "^1.4.3",
+	"debug": "^2.6.9",
+	"express": "^4.16.3",
+	"helmet": "^3.12.1",
+	"http-errors": "^1.6.3",
+	"jade": "^1.11.0",
+	"jsonwebtoken": "^8.3.0",
+	"moment": "^2.22.2",
+	"morgan": "^1.9.0",
+	"multer": "^1.3.1",
+	"multer-s3": "^2.7.0",
+	"promise-mysql": "^3.3.1"
+  }}```
 
 
 
@@ -108,3 +94,5 @@
 * [Android](https://github.com/Travel-Maker/Team-Android)
 * [iOS](https://github.com/Travel-Maker/Team-iOS)
 
+
+```
